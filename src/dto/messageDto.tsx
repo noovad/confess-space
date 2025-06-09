@@ -1,8 +1,8 @@
+import { UserDto } from "./userDto";
+
 export interface MessageDto {
   id: string;
-  senderName: string;
-  senderUsername: string;
-  avatarType: string;
-  content: string;
+  user: UserDto;
+  message: string;
   timestamp: string;
 }

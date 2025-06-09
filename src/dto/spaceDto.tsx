@@ -1,4 +1,4 @@
-import { UserDto } from "./useDto";
+import { UserDto } from "./userDto";
 
 export interface SpaceDto {
   name: string;

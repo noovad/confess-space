@@ -1,4 +1,4 @@
-import { UserDto } from "@/dto/useDto";
+import { UserDto } from "@/dto/userDto";
 
 const onlineUsers: UserDto[] = [
   {

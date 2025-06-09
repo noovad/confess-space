@@ -41,7 +41,7 @@ export default function RootLayout({
             <hr />
             <ResizablePanelGroup direction="horizontal">
               <ResizablePanel minSize={50} defaultSize={80}>
-                <div className="m-4">{children}</div>
+                <div>{children}</div>
               </ResizablePanel>
               <ResizableHandle />
               <ResizablePanel maxSize={25} minSize={5} defaultSize={20}>

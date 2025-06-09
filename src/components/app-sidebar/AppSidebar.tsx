@@ -14,7 +14,7 @@ import { FollowingSpaces } from "./components/FollowingSpaces";
 import followingSpaces from "@/data/followingSpaces";
 import suggestedSpaces from "@/data/suggestedSpaces";
 import { NavUser } from "./components/NavUser";
-import user from "@/data/user";
+import { userLogin } from "@/data/user";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
@@ -28,7 +28,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SuggestedSpaces spaces={suggestedSpaces} />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={user} />
+        <NavUser user={userLogin} />
       </SidebarFooter>
     </Sidebar>
   );
