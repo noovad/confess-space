@@ -1,11 +1,8 @@
-import { UserDto } from "./userDto";
-
 export interface SpaceDto {
+  id: string;
   name: string;
   slug: string;
-  numberOfUsers?: number;
-  users?: UserDto[];
-  owner?: UserDto;
+  ownerId: string;
   description?: string;
   createdAt?: string;
 }

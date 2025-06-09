@@ -44,7 +44,11 @@ export default function RootLayout({
                 <div>{children}</div>
               </ResizablePanel>
               <ResizableHandle />
-              <ResizablePanel maxSize={25} minSize={5} defaultSize={20}>
+              <ResizablePanel
+                maxSize={25}
+                minSize={5}
+                defaultSize={20}
+              >
                 <OnlineUsersSection />
               </ResizablePanel>
             </ResizablePanelGroup>

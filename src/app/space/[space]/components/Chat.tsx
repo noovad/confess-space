@@ -18,7 +18,7 @@ export default function Chat({ message, nextMessage }: ChatProps) {
   }
   return isSender(message.user.username) ? (
     <div className="flex justify-end mb-4 items-start">
-      <div className="bg-white border rounded-bl-3xl rounded-tl-3xl rounded-tr-xl py-2 px-4 me-4">
+      <div className="bg-white border rounded-xl rounded-br-none py-2 px-4 me-4">
         {message.message}
         <small className="flex justify-start text-xs text-gray-500 mt-1">
           {formatTimeOnly(message.timestamp)}
@@ -45,7 +45,7 @@ export default function Chat({ message, nextMessage }: ChatProps) {
           avatarType={message.user.avatarType}
         />
       )}
-      <div className="bg-white border rounded-tl-xl rounded-br-3xl rounded-tr-3xl py-2 px-4 ms-4">
+      <div className="bg-white border rounded-xl rounded-bl-none py-2 px-4 ms-4">
         {message.message}
         <small className="flex justify-end text-xs text-gray-500 mt-1">
           {formatTimeOnly(message.timestamp)}

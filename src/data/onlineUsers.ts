@@ -1,6 +1,6 @@
 import { UserDto } from "@/dto/userDto";
 
-const onlineUsers: UserDto[] = [
+export const onlineUsers: UserDto[] = [
   {
     id: "1",
     username: "shadcn",
@@ -58,5 +58,3 @@ const onlineUsers: UserDto[] = [
     avatarType: "micah",
   },
 ];
-
-export default onlineUsers;

@@ -10,7 +10,6 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { MoreHorizontal } from "lucide-react";
 import { SpaceDto } from "@/dto/spaceDto";
 import { isSpaceActive } from "@/utils/sidebar-utils";
 
@@ -54,10 +53,11 @@ export function SuggestedSpaces({ spaces }: FollowingSpacesProps) {
         </SidebarMenu>
         <SidebarMenu>
           <SidebarMenuItem className="pb-4 pt-2">
-            <SidebarMenuButton className="text-sidebar-foreground/70">
-              <MoreHorizontal className="" size={16} />
-              <span>See All </span>
-            </SidebarMenuButton>
+            <Link href={"/space"}>
+              <SidebarMenuButton className="">
+                <span>See All... </span>
+              </SidebarMenuButton>
+            </Link>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarGroupContent>

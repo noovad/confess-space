@@ -23,12 +23,6 @@ export default function Home() {
           >
             Explore Spaces
           </Link>
-          <Link
-            href="/create"
-            className="rounded-full border border-black/10 dark:border-white/20 px-5 py-3 text-sm sm:text-base font-medium hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] transition-colors text-center"
-          >
-            Create a Space
-          </Link>
         </div>
       </main>
 

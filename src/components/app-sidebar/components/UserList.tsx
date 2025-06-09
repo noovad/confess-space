@@ -1,5 +1,5 @@
 import { AppAvatarUser } from "@/components/app-avatar-user/AppAvatarUser";
-import onlineUsers from "@/data/onlineUsers";
+import { onlineUsers } from "@/data/onlineUsers";
 
 export function UserList() {
   return (

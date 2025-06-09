@@ -1,7 +1,7 @@
 import { UserDto } from "@/dto/userDto";
 
 export const userLogin: UserDto = {
-  id: "1",
+  id: "user-1",
   username: "shadcn",
   name: "Shad CN",
   email: "m@example.com",
