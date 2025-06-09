@@ -1,15 +1,24 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter, Poppins } from "next/font/google";
 import "./globals.css";
+import { SidebarProvider } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/app-sidebar/AppSidebar";
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const poppins = Poppins({
+  variable: "--font-poppins",
+  weight: ["400", "500", "600", "700"],
   subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -24,10 +33,24 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {children}
+      <body className={`${inter.variable} ${poppins.variable} antialiased`}>
+        <SidebarProvider>
+          <AppSidebar />
+          <main className="h-screen overflow-hidden w-full flex flex-col">
+            <hr />
+            <ResizablePanelGroup direction="horizontal">
+              <ResizablePanel minSize={50} defaultSize={80}>
+                <div className="m-4">{children}</div>
+              </ResizablePanel>
+              <ResizableHandle />
+              <ResizablePanel maxSize={25} defaultSize={20}>
+                <div className="flex flex-col h-full border-l bg-background p-4">
+                  <p className="text-sm text-gray-600">Right Panel Content</p>
+                </div>
+              </ResizablePanel>
+            </ResizablePanelGroup>
+          </main>
+        </SidebarProvider>
       </body>
     </html>
   );
