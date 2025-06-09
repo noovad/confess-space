@@ -8,6 +8,7 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
+import OnlineUsersSection from "@/components/app-sidebar/components/OnlineUsersSection";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -43,10 +44,8 @@ export default function RootLayout({
                 <div className="m-4">{children}</div>
               </ResizablePanel>
               <ResizableHandle />
-              <ResizablePanel maxSize={25} defaultSize={20}>
-                <div className="flex flex-col h-full border-l bg-background p-4">
-                  <p className="text-sm text-gray-600">Right Panel Content</p>
-                </div>
+              <ResizablePanel maxSize={25} minSize={5} defaultSize={20}>
+                <OnlineUsersSection />
               </ResizablePanel>
             </ResizablePanelGroup>
           </main>

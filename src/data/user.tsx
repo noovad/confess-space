@@ -5,7 +5,7 @@ const user: UserDto = {
   username: "shadcn",
   name: "Shad CN",
   email: "m@example.com",
-  avatar: "cowe",
+  avatarType: "cowe",
 };
 
 export default user;
