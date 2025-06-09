@@ -1,7 +1,11 @@
 import { MessageSquare } from "lucide-react";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 export default function Home() {
+  // Redirect the root page to the app route group
+  redirect("/space");
+
   return (
     <div className="grid grid-rows-[auto_1fr_auto] min-h-screen p-8 sm:p-20 pb-20 gap-16 justify-items-center font-[family-name:var(--font-geist-sans)]">
       <main className="row-start-2 flex flex-col gap-10 items-center text-center sm:text-left">
