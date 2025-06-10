@@ -12,23 +12,19 @@ import { LeaveSpaceDialog } from "./components/LeaveSpaceDialog";
 import { Card } from "@/components/ui/card";
 import { currentSpace } from "@/data/space";
 
-interface SpaceDetailProps {
-  params: { space: string };
-}
-
-const Space: React.FC<SpaceDetailProps> = ({}) => {
+export default function SpacePage() {
   const scrollRef = useRef<HTMLDivElement>(null);
-
   const space = currentSpace;
+
 
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, []);
+
+  });
 
   function isMemberOfSpace(): boolean {
-    // Call API with params space.id to check if the user is a member of the space
     return false;
   }
 
@@ -54,7 +50,7 @@ const Space: React.FC<SpaceDetailProps> = ({}) => {
 
         <div
           ref={scrollRef}
-          className="flex-1 overflow-y-auto flex flex-col-reverse gap-2"
+          className="flex-1 overflow-y-auto flex flex-col-reverse gap-2 p-4"
         >
           {messages.slice().map((msg, i, arr) => {
             const currentDate = formatDate(msg.timestamp);
@@ -65,7 +61,7 @@ const Space: React.FC<SpaceDetailProps> = ({}) => {
             const showDateDivider = currentDate !== nextDate;
 
             return (
-                <React.Fragment key={msg.id}>
+              <React.Fragment key={msg.id}>
                 <Chat
                   message={msg}
                   nextMessage={showDateDivider ? undefined : arr[i + 1]}
@@ -73,10 +69,10 @@ const Space: React.FC<SpaceDetailProps> = ({}) => {
 
                 {showDateDivider && (
                   <div className="text-center text-sm text-gray-500 my-4">
-                  {formatReadableDate(currentDate)}
+                    {formatReadableDate(currentDate)}
                   </div>
                 )}
-                </React.Fragment>
+              </React.Fragment>
             );
           })}
         </div>
@@ -95,6 +91,4 @@ const Space: React.FC<SpaceDetailProps> = ({}) => {
       </section>
     </main>
   );
-};
-
-export default Space;
+}
