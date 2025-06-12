@@ -1,18 +1,50 @@
 "use client";
 
+import { useAuthStore } from "@/app/store/useAuthStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useSearchParams } from "next/navigation";
+import { useState } from "react";
 
 export function SignupForm() {
+  const email = useSearchParams().get("email");
+  const [username, setUsername] = useState("");
+  const [name, setName] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const { signup, loading } = useAuthStore();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (
+      !username.trim() ||
+      !name.trim() ||
+      !password.trim() ||
+      !confirmPassword.trim()
+    ) {
+      setError("Please fill in all fields");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
+
+    await signup(username, name, password, email || "");
+  };
+
   return (
     <div className="flex flex-col gap-6">
       <div className="text-center">
         <h2 className="text-lg font-medium">Complete Your Profile</h2>
-        <p className="text-muted-foreground text-sm mt-1">Using example@gmail.com</p>
+        <p className="text-muted-foreground text-sm mt-1">Using {email}</p>
       </div>
 
-      <form className="flex flex-col gap-4">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div className="grid gap-3">
           <Label htmlFor="username">Username</Label>
           <Input
@@ -20,7 +52,8 @@ export function SignupForm() {
             name="username"
             type="text"
             placeholder="your_username"
-            required
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
           />
           <p className="text-muted-foreground text-xs">
             This will be your public @username
@@ -34,7 +67,8 @@ export function SignupForm() {
             name="name"
             type="text"
             placeholder="Your Name"
-            required
+            value={name}
+            onChange={(e) => setName(e.target.value)}
           />
         </div>
 
@@ -44,8 +78,8 @@ export function SignupForm() {
             id="password"
             name="password"
             type="password"
-            placeholder="••••••••"
-            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
           />
         </div>
 
@@ -55,12 +89,14 @@ export function SignupForm() {
             id="confirmPassword"
             name="confirmPassword"
             type="password"
-            placeholder="••••••••"
-            required
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
           />
         </div>
 
-        <Button type="submit" className="w-full mt-2">
+        {error && <p className="text-red-500 text-xs mt-2">{error}</p>}
+
+        <Button type="submit" disabled={loading} className="w-full mt-2">
           Create Account
         </Button>
       </form>

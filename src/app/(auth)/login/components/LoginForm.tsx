@@ -4,20 +4,15 @@ import { useState } from "react";
 import { MessageSquare } from "lucide-react";
 import { toast } from "sonner";
 
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuthStore } from "@/app/store/useAuthStore";
 
-export function LoginForm({
-  className,
-  ...props
-}: React.ComponentProps<"div">) {
+export function LoginForm() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const { login, loginWithGoogle, loading, loadingWithGoogle} =
-    useAuthStore();
+  const { login, loginWithGoogle, loading } = useAuthStore();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,7 +29,7 @@ export function LoginForm({
   };
 
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
+    <div className="flex flex-col gap-6">
       <form onSubmit={handleSubmit}>
         <div className="flex flex-col gap-6">
           <div className="flex flex-col items-center gap-2">
@@ -85,7 +80,7 @@ export function LoginForm({
         type="button"
         className="w-full"
         onClick={handleGoogleLogin}
-        disabled={loadingWithGoogle}
+        disabled={loading}
       >
         <svg
           className="mr-2 h-4 w-4"
@@ -97,7 +92,7 @@ export function LoginForm({
             fill="currentColor"
           />
         </svg>
-        {loadingWithGoogle ? "Redirecting..." : "Continue with Google"}
+        {loading ? "Redirecting..." : "Continue with Google"}
       </Button>
 
       <div className="text-muted-foreground *:[a]:hover:text-primary text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4">

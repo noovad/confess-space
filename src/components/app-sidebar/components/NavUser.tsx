@@ -15,17 +15,22 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  useSidebar,
 } from "@/components/ui/sidebar";
 import { UserDto } from "@/dto/userDto";
 import { AppAvatarUser } from "@/components/app-avatar-user/AppAvatarUser";
+import { useAuthStore } from "@/app/store/useAuthStore";
+import { Button } from "@/components/ui/button";
 
 interface NavUserProps {
   user: UserDto;
 }
 
 export function NavUser({ user }: NavUserProps) {
-  const { isMobile } = useSidebar();
+  const { logout } = useAuthStore();
+
+  const handleLogout = async () => {
+    await logout();
+  };
 
   return (
     <SidebarMenu>
@@ -50,7 +55,7 @@ export function NavUser({ user }: NavUserProps) {
           </DropdownMenuTrigger>
           <DropdownMenuContent
             className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
-            side={isMobile ? "bottom" : "right"}
+            side={"right"}
             align="end"
             sideOffset={4}
           >
@@ -76,8 +81,15 @@ export function NavUser({ user }: NavUserProps) {
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem>
-              <LogOut />
-              Log out
+              <Button
+                variant="ghost"
+                className="w-full justify-start"
+                size={"sm"}
+                onClick={handleLogout}
+              >
+                <LogOut />
+                Log out
+              </Button>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
