@@ -20,16 +20,21 @@ import { UserDto } from "@/dto/userDto";
 import { AppAvatarUser } from "@/components/app-avatar-user/AppAvatarUser";
 import { useAuthStore } from "@/app/store/useAuthStore";
 import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 
 interface NavUserProps {
   user: UserDto;
 }
 
 export function NavUser({ user }: NavUserProps) {
+  const router = useRouter();
   const { logout } = useAuthStore();
 
   const handleLogout = async () => {
-    await logout();
+    const result = await logout();
+    if (result) {
+      router.push("/login");
+    }
   };
 
   return (

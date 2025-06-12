@@ -4,10 +4,11 @@ import { useAuthStore } from "@/app/store/useAuthStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 export function SignupForm() {
+  const router = useRouter();
   const email = useSearchParams().get("email");
   const [username, setUsername] = useState("");
   const [name, setName] = useState("");
@@ -34,7 +35,10 @@ export function SignupForm() {
       return;
     }
 
-    await signup(username, name, password, email || "");
+    const result = await signup(username, name, password, email || "");
+    if (result) {
+      router.push("/");
+    }
   };
 
   return (

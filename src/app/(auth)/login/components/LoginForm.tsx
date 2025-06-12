@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { MessageSquare } from "lucide-react";
 import { toast } from "sonner";
 
@@ -10,9 +11,10 @@ import { Label } from "@/components/ui/label";
 import { useAuthStore } from "@/app/store/useAuthStore";
 
 export function LoginForm() {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const { login, loginWithGoogle, loading } = useAuthStore();
+  const router = useRouter();
+  const [username, setUsername] = useState("test");
+  const [password, setPassword] = useState("12345678");
+  const { login, loginWithGoogle, loading, loadingRedirect } = useAuthStore();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,7 +23,10 @@ export function LoginForm() {
       return;
     }
 
-    await login(username, password);
+    const result = await login(username, password);
+    if (result) {
+      router.push("/");
+    }
   };
 
   const handleGoogleLogin = async () => {
@@ -56,7 +61,6 @@ export function LoginForm() {
               <Input
                 id="password"
                 type="password"
-                placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -80,7 +84,7 @@ export function LoginForm() {
         type="button"
         className="w-full"
         onClick={handleGoogleLogin}
-        disabled={loading}
+        disabled={loadingRedirect}
       >
         <svg
           className="mr-2 h-4 w-4"
@@ -92,7 +96,7 @@ export function LoginForm() {
             fill="currentColor"
           />
         </svg>
-        {loading ? "Redirecting..." : "Continue with Google"}
+        {loadingRedirect ? "Redirecting..." : "Continue with Google"}
       </Button>
 
       <div className="text-muted-foreground *:[a]:hover:text-primary text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4">

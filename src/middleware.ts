@@ -10,7 +10,7 @@ export async function middleware(req: NextRequest) {
     if (AUTH_PATHS.includes(pathname)) {
         if (token) {
             try {
-                const secret = new TextEncoder().encode(process.env.NEXT_PUBLIC_AUTHORIZATION_TOKEN!);
+                const secret = new TextEncoder().encode(process.env.AUTHORIZATION_TOKEN!);
                 const { payload } = await jwtVerify(token, secret);
 
                 if (payload && (!payload.exp || Date.now() < payload.exp * 1000)) {
@@ -30,7 +30,7 @@ export async function middleware(req: NextRequest) {
     }
 
     try {
-        const secret = new TextEncoder().encode(process.env.NEXT_PUBLIC_AUTHORIZATION_TOKEN!);
+        const secret = new TextEncoder().encode(process.env.AUTHORIZATION_TOKEN!);
         const { payload } = await jwtVerify(token, secret);
 
         if (payload.exp && Date.now() >= payload.exp * 1000) {
