@@ -14,7 +14,6 @@ import { FollowingSpaces } from "./components/FollowingSpaces";
 import { NavUser } from "./components/NavUser";
 import { userLogin } from "@/data/user";
 import { spaces } from "@/data/spaces";
-import { followingSpaces } from "@/data/followingSpaces";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
@@ -23,7 +22,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavHeader />
       </SidebarHeader>
       <SidebarContent className="overflow-hidden">
-        <FollowingSpaces spaces={followingSpaces} />
+        <FollowingSpaces />
         <hr className="mx-4" />
         <SuggestedSpaces spaces={spaces} />
       </SidebarContent>
