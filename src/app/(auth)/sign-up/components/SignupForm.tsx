@@ -5,17 +5,21 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 
-export function SignupForm() {
+// Separate component that uses useSearchParams
+function SignupFormContent() {
   const router = useRouter();
-  const email = useSearchParams().get("email");
+  const { signup, loading } = useAuthStore();
   const [username, setUsername] = useState("");
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const { signup, loading } = useAuthStore();
+
+  // Move useSearchParams inside this component
+  const searchParams = useSearchParams();
+  const email = searchParams.get("email");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -105,5 +109,14 @@ export function SignupForm() {
         </Button>
       </form>
     </div>
+  );
+}
+
+// Main component that wraps the content with Suspense
+export function SignupForm() {
+  return (
+    <Suspense fallback={<div className="text-center py-6">Loading...</div>}>
+      <SignupFormContent />
+    </Suspense>
   );
 }

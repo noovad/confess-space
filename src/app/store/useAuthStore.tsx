@@ -2,8 +2,8 @@
 
 import { create } from "zustand";
 import { toast } from "sonner";
-import axios from "@/lib/axios";
 import { AxiosError } from "axios";
+import { axiosAuthInstance } from "@/lib/axios";
 
 interface AuthState {
   loading: boolean;
@@ -26,7 +26,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   login: async (username, password) => {
     set({ loading: true });
     try {
-      await axios.post("/login", { username, password });
+      await axiosAuthInstance.post("/login", { username, password });
       toast.success("Login successful!");
       return true;
     } catch (error) {
@@ -40,7 +40,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   loginWithGoogle: async () => {
     set({ loadingRedirect: true });
     try {
-      const response = await axios.get("/auth");
+      const response = await axiosAuthInstance.get("/auth");
 
       if (response.data?.data?.url) {
         window.location.href = response.data.data.url;
@@ -60,7 +60,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({ loading: true });
 
     try {
-      await axios.post(`/sign-up?email=${email}`, {
+      await axiosAuthInstance.post(`/sign-up?email=${email}`, {
         username,
         name,
         password,
@@ -79,7 +79,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   logout: async () => {
     set({ loading: true });
     try {
-      await axios.post("/logout");
+      await axiosAuthInstance.post("/logout");
       toast.success("Logout successful!");
       return true;
     } catch (error) {

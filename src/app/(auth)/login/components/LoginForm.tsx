@@ -13,7 +13,7 @@ import { useAuthStore } from "@/app/store/useAuthStore";
 export function LoginForm() {
   const router = useRouter();
   const [username, setUsername] = useState("test");
-  const [password, setPassword] = useState("12345678");
+  const [password, setPassword] = useState("12312344");
   const { login, loginWithGoogle, loading, loadingRedirect } = useAuthStore();
 
   const handleSubmit = async (e: React.FormEvent) => {
