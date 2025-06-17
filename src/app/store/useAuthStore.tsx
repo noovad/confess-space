@@ -26,7 +26,16 @@ export const useAuthStore = create<AuthState>((set) => ({
   login: async (username, password) => {
     set({ loading: true });
     try {
-      await axiosAuthInstance.post("/login", { username, password });
+      const response = await axiosAuthInstance.post("/login", {
+        username,
+        password,
+      });
+      const accessToken = response.data?.data?.AccessToken;
+      const refreshToken = response.data?.data?.RefreshToken;
+      if (accessToken && refreshToken) {
+        localStorage.setItem("accessToken", accessToken);
+        localStorage.setItem("refreshToken", refreshToken);
+      }
       toast.success("Login successful!");
       return true;
     } catch (error) {
@@ -60,11 +69,17 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({ loading: true });
 
     try {
-      await axiosAuthInstance.post(`/sign-up?email=${email}`, {
+      const response = await axiosAuthInstance.post(`/sign-up?email=${email}`, {
         username,
         name,
         password,
       });
+      const accessToken = response.data?.data?.AccessToken;
+      const refreshToken = response.data?.data?.RefreshToken;
+      if (accessToken && refreshToken) {
+        localStorage.setItem("accessToken", accessToken);
+        localStorage.setItem("refreshToken", refreshToken);
+      }
       toast.success("Signup successful!");
       return true;
     } catch (error) {
@@ -79,7 +94,8 @@ export const useAuthStore = create<AuthState>((set) => ({
   logout: async () => {
     set({ loading: true });
     try {
-      await axiosAuthInstance.post("/logout");
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
       toast.success("Logout successful!");
       return true;
     } catch (error) {

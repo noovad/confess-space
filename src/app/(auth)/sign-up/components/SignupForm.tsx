@@ -7,7 +7,6 @@ import { Label } from "@/components/ui/label";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 
-// Separate component that uses useSearchParams
 function SignupFormContent() {
   const router = useRouter();
   const { signup, loading } = useAuthStore();
@@ -17,7 +16,6 @@ function SignupFormContent() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
 
-  // Move useSearchParams inside this component
   const searchParams = useSearchParams();
   const email = searchParams.get("email");
 
@@ -112,7 +110,6 @@ function SignupFormContent() {
   );
 }
 
-// Main component that wraps the content with Suspense
 export function SignupForm() {
   return (
     <Suspense fallback={<div className="text-center py-6">Loading...</div>}>

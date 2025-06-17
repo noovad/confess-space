@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Poppins } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
+import { AuthGuard } from "@/components/auth/AuthGuard";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -29,7 +30,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${inter.variable} ${poppins.variable} antialiased`}>
         <Toaster position="top-center" />
-        {children}
+        <AuthGuard>{children}</AuthGuard>
       </body>
     </html>
   );
