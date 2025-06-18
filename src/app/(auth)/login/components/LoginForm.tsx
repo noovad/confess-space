@@ -12,14 +12,46 @@ import { useAuthStore } from "@/app/store/useAuthStore";
 
 export function LoginForm() {
   const router = useRouter();
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  const [username, setUsername] = useState("test");
+  const [password, setPassword] = useState("12345678");
+  const [usernameError, setUsernameError] = useState<string | null>(null);
   const { login, loginWithGoogle, loading, loadingRedirect } = useAuthStore();
+
+  const validateUsername = (value: string) => {
+    const regex = /^[a-z0-9](?!.*[_.]{2})[a-z0-9._]{1,18}[a-z0-9]$/;
+
+    if (!value) {
+      setUsernameError(null);
+      return;
+    }
+
+    if (value.length < 3) {
+      setUsernameError("Username must be at least 3 characters");
+    } else if (value.length > 20) {
+      setUsernameError("Username must be less than 20 characters");
+    } else if (value.includes(" ")) {
+      setUsernameError("Username cannot contain spaces");
+    } else if (!/^[a-z0-9._]+$/.test(value)) {
+      setUsernameError(
+        "Only lowercase letters, numbers, dots, and underscores allowed"
+      );
+    } else if (!regex.test(value)) {
+      setUsernameError("Invalid username format");
+    } else {
+      setUsernameError(null);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!username.trim() || !password.trim()) {
       toast.error("Please fill in all fields");
+      return;
+    }
+
+    const regex = /^[a-z0-9](?!.*[_.]{2})[a-z0-9._]{1,18}[a-z0-9]$/;
+    if (!regex.test(username) || username.length < 3 || username.length > 20) {
+      toast.error("Username must be 3–20 characters, lowercase, no spaces.");
       return;
     }
 
@@ -52,9 +84,17 @@ export function LoginForm() {
                 type="text"
                 placeholder="your_username"
                 value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setUsername(value);
+                  validateUsername(value);
+                }}
+                className={usernameError ? "border-red-500" : ""}
                 required
               />
+              {usernameError && (
+                <p className="text-red-500 text-xs">{usernameError}</p>
+              )}
             </div>
             <div className="grid gap-3">
               <Label htmlFor="password">Password</Label>

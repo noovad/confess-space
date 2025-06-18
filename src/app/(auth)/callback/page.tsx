@@ -1,25 +1,41 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { axiosAuthInstance } from "@/lib/axios";
+import { toast } from "sonner";
 
 export default function GoogleOAuthCallbackPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
 
   useEffect(() => {
-    const accessToken = searchParams.get("accessToken");
-    const refreshToken = searchParams.get("refreshToken");
+    const handleCodeExchange = async () => {
+      const code = new URLSearchParams(window.location.search).get("code");
 
-    if (accessToken && refreshToken) {
-      localStorage.setItem("accessToken", accessToken);
-      localStorage.setItem("refreshToken", refreshToken);
+      if (!code) {
+        router.replace("/login?error=Missing+OAuth+code");
+        toast.error("Missing OAuth code");
+        return;
+      }
 
-      router.replace("/space");
-    } else {
-      router.replace("/login?error=Invalid OAuth response");
-    }
-  }, [searchParams, router]);
+      axiosAuthInstance.post("/exchange-code", { code }).then((res) => {
+        const { accessToken, refreshToken, user } = res.data;
 
-  return <p>Logging you in...</p>;
+        if (accessToken && refreshToken && user) {
+          localStorage.setItem("accessToken", accessToken);
+          localStorage.setItem("refreshToken", refreshToken);
+          localStorage.setItem("user", JSON.stringify(user));
+          toast.success("Login successful!");
+          router.replace("/");
+        } else {
+          router.replace("/login?error=Invalid+token+response");
+          toast.error("Invalid token response");
+        }
+      });
+    };
+
+    handleCodeExchange();
+  }, [router]);
+
+  return <p>{"Loading..."}</p>;
 }

@@ -15,9 +15,35 @@ function SignupFormContent() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [usernameError, setUsernameError] = useState<string | null>(null);
 
   const searchParams = useSearchParams();
   const email = searchParams.get("email");
+
+  const validateUsername = (value: string) => {
+    const regex = /^[a-z0-9](?!.*[_.]{2})[a-z0-9._]{1,18}[a-z0-9]$/;
+
+    if (!value) {
+      setUsernameError(null);
+      return;
+    }
+
+    if (value.length < 3) {
+      setUsernameError("Username must be at least 3 characters");
+    } else if (value.length > 20) {
+      setUsernameError("Username must be less than 20 characters");
+    } else if (value.includes(" ")) {
+      setUsernameError("Username cannot contain spaces");
+    } else if (!/^[a-z0-9._]+$/.test(value)) {
+      setUsernameError(
+        "Only lowercase letters, numbers, dots, and underscores allowed"
+      );
+    } else if (!regex.test(value)) {
+      setUsernameError("Invalid username format");
+    } else {
+      setUsernameError(null);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,6 +55,12 @@ function SignupFormContent() {
       !confirmPassword.trim()
     ) {
       setError("Please fill in all fields");
+      return;
+    }
+
+    const regex = /^[a-z0-9](?!.*[_.]{2})[a-z0-9._]{1,18}[a-z0-9]$/;
+    if (!regex.test(username) || username.length < 3 || username.length > 20) {
+      setError("Username must be 3–20 characters, lowercase, no spaces.");
       return;
     }
 
@@ -59,11 +91,20 @@ function SignupFormContent() {
             type="text"
             placeholder="your_username"
             value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            onChange={(e) => {
+              const value = e.target.value;
+              setUsername(value);
+              validateUsername(value);
+            }}
+            className={usernameError ? "border-red-500" : ""}
           />
-          <p className="text-muted-foreground text-xs">
-            This will be your public @username
-          </p>
+          {usernameError ? (
+            <p className="text-red-500 text-xs">{usernameError}</p>
+          ) : (
+            <p className="text-muted-foreground text-xs">
+              This will be your public @username
+            </p>
+          )}
         </div>
 
         <div className="grid gap-3">
@@ -103,7 +144,7 @@ function SignupFormContent() {
         {error && <p className="text-red-500 text-xs mt-2">{error}</p>}
 
         <Button type="submit" disabled={loading} className="w-full mt-2">
-          Create Account
+          {loading ? "Signing up..." : "Create Account"}
         </Button>
       </form>
     </div>

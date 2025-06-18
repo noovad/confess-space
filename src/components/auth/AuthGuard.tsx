@@ -3,8 +3,10 @@
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { jwtDecode } from "jwt-decode";
+import { useAuthStore } from "@/app/store/useAuthStore";
 
-const GUEST_PATHS = ["/login", "/sign-up", "/auth/callback"];
+const GUEST_PATHS = ["/login", "/sign-up", "/callback"];
+const PUBLIC_PATHS = ["/callback"];
 
 interface JwtPayload {
   exp?: number;
@@ -14,13 +16,21 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const [isReady, setIsReady] = useState(false);
+  const { refresh } = useAuthStore();
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const token = localStorage.getItem("accessToken");
-    if (pathname === "/callback") return setIsReady(true);
 
-    const isValidToken = (token: string) => {
+    const accessToken = localStorage.getItem("accessToken");
+    const refreshToken = localStorage.getItem("refreshToken");
+
+    if (PUBLIC_PATHS.includes(pathname)) {
+      setIsReady(true);
+      return;
+    }
+
+    const isValidToken = (token: string | null) => {
+      if (!token) return false;
       try {
         const decoded = jwtDecode<JwtPayload>(token);
         return decoded.exp && Date.now() < decoded.exp * 1000;
@@ -29,22 +39,34 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
       }
     };
 
-    if (GUEST_PATHS.includes(pathname)) {
-      if (token && isValidToken(token)) {
-        router.replace("/space");
+    const proceed = async () => {
+      if (GUEST_PATHS.includes(pathname)) {
+        if (accessToken && isValidToken(accessToken)) {
+          router.replace("/");
+        } else {
+          setIsReady(true);
+        }
+        return;
+      }
+
+      if (!accessToken || !isValidToken(accessToken)) {
+        if (refreshToken && isValidToken(refreshToken)) {
+          const success = await refresh();
+          if (success) {
+            setIsReady(true);
+            return;
+          }
+        }
+
+        localStorage.removeItem("accessToken");
+        router.replace("/login");
       } else {
         setIsReady(true);
       }
-      return;
-    }
+    };
 
-    if (!token || !isValidToken(token)) {
-      localStorage.removeItem("accessToken");
-      router.replace("/login");
-    } else {
-      setIsReady(true);
-    }
-  }, [pathname, router]);
+    proceed();
+  }, [pathname, refresh, router]);
 
   if (!isReady) return null;
 

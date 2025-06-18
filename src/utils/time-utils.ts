@@ -5,20 +5,20 @@
  * @returns Formatted time string (e.g., "23:00")
  */
 export function formatTimeOnly(isoDateString: string): string {
-    try {
-        const date = new Date(isoDateString);
+    const date = new Date(isoDateString);
 
-        // Format to hours and minutes only
-        return date.toLocaleTimeString([], {
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: false // Use 24-hour format
-        });
-    } catch (error) {
-        console.error("Error formatting time:", error);
-        return isoDateString; // Return original string if parsing fails
+    if (isNaN(date.getTime())) {
+        console.warn("Invalid date string:", isoDateString);
+        return isoDateString;
     }
+
+    return date.toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+    });
 }
+
 
 export function formatDateOnly(timestamp: string | Date): string {
     const date = new Date(timestamp);
@@ -26,6 +26,6 @@ export function formatDateOnly(timestamp: string | Date): string {
         day: "2-digit",
         month: "short",
         year: "numeric",
-    }); // Output: 12 Feb 2025
+    });
 }
 

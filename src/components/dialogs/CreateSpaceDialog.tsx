@@ -34,7 +34,6 @@ export function CreateSpaceDialog() {
       return;
     }
 
-    console.log("Creating space:", { name, description });
     toast.success("Space created!", {
       description: `Your space "${name}" has been created successfully.`,
     });

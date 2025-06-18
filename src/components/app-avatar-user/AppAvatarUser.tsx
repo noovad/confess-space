@@ -2,21 +2,21 @@ import { getAvatar } from "@/utils/avatar-utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
 
 interface AppAvatarProps {
-  name: string;
-  username: string;
-  avatarType: string;
+  name?: string | null;
+  username?: string | null;
+  avatarType?: string | null;
 }
 export function AppAvatarUser({ name, username, avatarType }: AppAvatarProps) {
   return (
     <>
       <Avatar>
         <AvatarImage
-          src={getAvatar(username, avatarType)}
-          alt={name}
+          src={getAvatar(username ?? "", avatarType ?? "notionists")}
+          alt={name ?? ""}
           className="rounded-full size-8"
         />
         <AvatarFallback className="rounded-full size-8 bg-black text-white flex items-center justify-center text-base">
-          {name.charAt(0).toUpperCase()}
+          {name?.charAt(0).toUpperCase() || "?"}
         </AvatarFallback>
       </Avatar>
     </>
