@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { ChevronsUpDown, LogOut, User2 } from "lucide-react";
 import {
   Dialog,
@@ -28,12 +27,11 @@ import { AppAvatarUser } from "@/components/app-avatar-user/AppAvatarUser";
 import { useAuthStore } from "@/app/store/useAuthStore";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
-import { UserDto } from "@/dto/userDto";
 
 export function NavUser() {
   const router = useRouter();
   const { logout, deleteAccount } = useAuthStore();
-  const [user, setUser] = useState<UserDto | null>(null);
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
 
   const handleDeleteAccount = async () => {
     const result = await deleteAccount();
@@ -42,25 +40,12 @@ export function NavUser() {
     }
   };
 
-  useEffect(() => {
-    const userData = localStorage.getItem("user");
-    if (userData) {
-      try {
-        setUser(JSON.parse(userData));
-      } catch {
-        setUser(null);
-      }
-    }
-  }, []);
-
   const handleLogout = async () => {
     const result = await logout();
     if (result) {
       router.push("/login");
     }
   };
-
-  if (!user) return null;
 
   return (
     <SidebarMenu>

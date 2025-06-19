@@ -2,7 +2,7 @@
 
 import { create } from "zustand";
 import { SpaceDto } from "@/dto/spaceDto";
-import { axiosInstance } from "@/lib/axios";
+import axiosApp from "@/lib/axiosApp";
 
 export interface SpaceState {
   loading: boolean;
@@ -20,12 +20,11 @@ export const useSpaceStore = create<SpaceState>((set) => ({
   fetchFollowingSpaces: async () => {
     set({ loading: true });
     try {
-      const response = await axiosInstance.get("/space");
+      const response = await axiosApp.get("/space");
       const data: SpaceDto[] = response.data.data;
       set({ followingSpaces: data });
       return true;
-    } catch (error) {
-      console.error("Failed to fetch following spaces", error);
+    } catch {
       return false;
     } finally {
       set({ loading: false });
@@ -35,12 +34,11 @@ export const useSpaceStore = create<SpaceState>((set) => ({
   fetchSuggestedSpaces: async () => {
     set({ loading: true });
     try {
-      const response = await axiosInstance.get("/space");
+      const response = await axiosApp.get("/space");
       const data: SpaceDto[] = response.data.data;
       set({ suggestedSpaces: data });
       return true;
-    } catch (error) {
-      console.error("Failed to fetch suggested spaces", error);
+    } catch {
       return false;
     } finally {
       set({ loading: false });

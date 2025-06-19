@@ -6,7 +6,6 @@ import { jwtDecode } from "jwt-decode";
 import { useAuthStore } from "@/app/store/useAuthStore";
 
 const GUEST_PATHS = ["/login", "/sign-up", "/callback"];
-const PUBLIC_PATHS = ["/callback"];
 
 interface JwtPayload {
   exp?: number;
@@ -16,18 +15,11 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const [isReady, setIsReady] = useState(false);
+  const token = localStorage.getItem("token");
   const { refresh } = useAuthStore();
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-
-    const accessToken = localStorage.getItem("accessToken");
-    const refreshToken = localStorage.getItem("refreshToken");
-
-    if (PUBLIC_PATHS.includes(pathname)) {
-      setIsReady(true);
-      return;
-    }
 
     const isValidToken = (token: string | null) => {
       if (!token) return false;
@@ -41,7 +33,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
 
     const proceed = async () => {
       if (GUEST_PATHS.includes(pathname)) {
-        if (accessToken && isValidToken(accessToken)) {
+        if (token && isValidToken(token)) {
           router.replace("/");
         } else {
           setIsReady(true);
@@ -49,16 +41,12 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
         return;
       }
 
-      if (!accessToken || !isValidToken(accessToken)) {
-        if (refreshToken && isValidToken(refreshToken)) {
-          const success = await refresh();
-          if (success) {
-            setIsReady(true);
-            return;
-          }
+      if (!token || !isValidToken(token)) {
+        const result = await refresh();
+        if (result) {
+          setIsReady(true);
+          return;
         }
-
-        localStorage.removeItem("accessToken");
         router.replace("/login");
       } else {
         setIsReady(true);
@@ -66,7 +54,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
     };
 
     proceed();
-  }, [pathname, refresh, router]);
+  }, [pathname, router, token, refresh]);
 
   if (!isReady) return null;
 

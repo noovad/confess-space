@@ -8,7 +8,6 @@ export function formatTimeOnly(isoDateString: string): string {
     const date = new Date(isoDateString);
 
     if (isNaN(date.getTime())) {
-        console.warn("Invalid date string:", isoDateString);
         return isoDateString;
     }
 
