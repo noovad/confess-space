@@ -16,8 +16,7 @@ export function getUserFromClientCookie(): UserDto | null {
             email: claims.email,
             avatar_type: claims.avatar_type || '',
         };
-    } catch (err) {
-        console.error('Invalid JWT:', err);
+    } catch {
         return null;
     }
 }

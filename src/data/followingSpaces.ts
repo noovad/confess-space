@@ -1,6 +1,6 @@
 import { SpaceDto } from "@/dto/spaceDto";
 
-export const followingSpaces: SpaceDto[] = [
+export const followingSpacesData: SpaceDto[] = [
   {
     id: "space-5",
     name: "Design Engineering",

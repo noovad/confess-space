@@ -1,7 +1,7 @@
 import { spaces } from "@/data/spaces";
 import Head from "next/head";
 import { SpaceCard } from "./components/SpaceCard";
-import { CreateSpaceDialog } from "@/components/dialogs/CreateSpaceDialog";
+import { CreateSpaceDialog } from "@/app/(pages)/space/components/CreateSpaceDialog";
 
 const SpacesPage = () => {
   return (

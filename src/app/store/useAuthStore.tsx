@@ -2,10 +2,8 @@ import { create } from "zustand";
 import { toast } from "sonner";
 import { AxiosError } from "axios";
 import axiosAuth from "@/lib/axiosAuth";
-import { UserDto } from "@/dto/userDto";
 
 interface AuthState {
-  user: UserDto | null;
   loading: boolean;
   loadingRedirect: boolean;
   login: (username: string, password: string) => Promise<boolean>;
@@ -23,7 +21,6 @@ interface AuthState {
 export const UseAuthStore = create<AuthState>((set) => ({
   loading: false,
   loadingRedirect: false,
-  user: null,
   token: null,
 
   login: async (username, password) => {

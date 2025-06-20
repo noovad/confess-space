@@ -10,23 +10,35 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { SpaceDto } from "@/dto/spaceDto";
 import { isSpaceActive } from "@/utils/sidebar-utils";
+import { useSpaceStore } from "@/app/store/useSpaceStore";
+import { useEffect, useState } from "react";
+import { UserDto } from "@/dto/userDto";
+import { getUserFromClientCookie } from "@/utils/getUser";
 
-interface FollowingSpacesProps {
-  spaces: SpaceDto[];
-}
-
-export function SuggestedSpaces({ spaces }: FollowingSpacesProps) {
+export function AvailableSpaces() {
   const pathname = usePathname();
+  const { availableSpaces, fetchAvailableSpaces } = useSpaceStore();
+  const [user, setUser] = useState<UserDto | null>(null);
+
+  useEffect(() => {
+    const u = getUserFromClientCookie();
+    setUser(u);
+  }, []);
+
+  useEffect(() => {
+    if (user?.id) {
+      fetchAvailableSpaces();
+    }
+  }, [fetchAvailableSpaces, user?.id]);
   return (
     <SidebarGroup>
       <SidebarGroupContent>
         <SidebarMenu>
           <p className=" ps-2 pt-2 text-xs text-muted-foreground">
-            Suggested Spaces
+            Available Spaces
           </p>
-          {spaces.map((item) => (
+          {availableSpaces.map((item) => (
             <SidebarMenuItem key={item.name}>
               <SidebarMenuButton
                 asChild

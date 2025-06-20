@@ -1,5 +1,4 @@
 "use client";
-
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -10,36 +9,26 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { AppSearchForm } from "@/components/app-search-form/AppSearchForm";
-import { SpaceDto } from "@/dto/spaceDto";
 import { isSpaceActive } from "@/utils/sidebar-utils";
 import { useSpaceStore } from "@/app/store/useSpaceStore";
+import { getUserFromClientCookie } from "@/utils/getUser";
+import { UserDto } from "@/dto/userDto";
 
 export function FollowingSpaces() {
   const { followingSpaces, fetchFollowingSpaces } = useSpaceStore();
-  const [filteredSpaces, setFilteredSpaces] = useState<SpaceDto[]>([]);
   const pathname = usePathname();
+  const [user, setUser] = useState<UserDto | null>(null);
 
   useEffect(() => {
-    fetchFollowingSpaces();
-  }, [fetchFollowingSpaces]);
+    const u = getUserFromClientCookie();
+    setUser(u);
+  }, []);
 
   useEffect(() => {
-    setFilteredSpaces(followingSpaces);
-  }, [followingSpaces]);
-
-  const handleSearch = (query: string) => {
-    const q = query.trim().toLowerCase();
-    if (!q) {
-      setFilteredSpaces(followingSpaces);
-      return;
+    if (user?.id) {
+      fetchFollowingSpaces(user.id);
     }
-
-    const result = followingSpaces.filter((space) =>
-      space.name.toLowerCase().includes(q)
-    );
-    setFilteredSpaces(result);
-  };
+  }, [fetchFollowingSpaces, user?.id]);
 
   return (
     <SidebarGroup className="overflow-auto group-data-[collapsible=icon]:hidden">
@@ -47,10 +36,10 @@ export function FollowingSpaces() {
       <p className="ps-2 pt-2 text-xs text-muted-foreground">
         Following Spaces
       </p>
-      <AppSearchForm onSearch={handleSearch} />
+      {/* <AppSearchForm onSearch={handleSearch} /> */}
       <SidebarMenu className="overflow-y-auto mt-2">
-        {filteredSpaces.length > 0 ? (
-          filteredSpaces.map((space) => (
+        {followingSpaces.length > 0 ? (
+          followingSpaces.map((space) => (
             <SidebarMenuItem key={space.id}>
               <SidebarMenuButton
                 asChild
