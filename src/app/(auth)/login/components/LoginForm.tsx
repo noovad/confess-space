@@ -8,14 +8,14 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useAuthStore } from "@/app/store/useAuthStore";
+import { UseAuthStore } from "@/app/store/useAuthStore";
 
 export function LoginForm() {
   const router = useRouter();
   const [username, setUsername] = useState("test");
   const [password, setPassword] = useState("12345678");
   const [usernameError, setUsernameError] = useState<string | null>(null);
-  const { login, loginWithGoogle, loading, loadingRedirect } = useAuthStore();
+  const { login, loginWithGoogle, loading, loadingRedirect } = UseAuthStore();
 
   const validateUsername = (value: string) => {
     const regex = /^[a-z0-9](?!.*[_.]{2})[a-z0-9._]{1,18}[a-z0-9]$/;

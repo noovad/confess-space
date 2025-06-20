@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/sidebar";
 import { NavHeader } from "./components/NavHeader";
 import { SuggestedSpaces } from "./components/SuggestedSpaces";
-// import { FollowingSpaces } from "./components/FollowingSpaces";
 import { NavUser } from "./components/NavUser";
 import { spaces } from "@/data/spaces";
 
@@ -26,7 +25,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SuggestedSpaces spaces={spaces} />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser/>
+        <NavUser />
       </SidebarFooter>
     </Sidebar>
   );

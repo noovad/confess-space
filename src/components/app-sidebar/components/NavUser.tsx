@@ -24,14 +24,14 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { AppAvatarUser } from "@/components/app-avatar-user/AppAvatarUser";
-import { useAuthStore } from "@/app/store/useAuthStore";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import { UseAuthStore } from "@/app/store/useAuthStore";
 
 export function NavUser() {
   const router = useRouter();
-  const { logout, deleteAccount } = useAuthStore();
-  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const { logout, deleteAccount } = UseAuthStore();
+  const user = JSON.parse("{}");
 
   const handleDeleteAccount = async () => {
     const result = await deleteAccount();

@@ -1,6 +1,6 @@
 "use client";
 
-import { useAuthStore } from "@/app/store/useAuthStore";
+import { UseAuthStore } from "@/app/store/useAuthStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,7 +9,7 @@ import { Suspense, useState } from "react";
 
 function SignupFormContent() {
   const router = useRouter();
-  const { signup, loading } = useAuthStore();
+  const { signup, loading } = UseAuthStore();
   const [username, setUsername] = useState("");
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");

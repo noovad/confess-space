@@ -3,6 +3,7 @@
 import { create } from "zustand";
 import { SpaceDto } from "@/dto/spaceDto";
 import axiosApp from "@/lib/axiosApp";
+import { UseAuthStore } from "./useAuthStore";
 
 export interface SpaceState {
   loading: boolean;
@@ -19,9 +20,14 @@ export const useSpaceStore = create<SpaceState>((set) => ({
 
   fetchFollowingSpaces: async () => {
     set({ loading: true });
+    const { user } = UseAuthStore.getState();
     try {
-      const response = await axiosApp.get("/space");
-      const data: SpaceDto[] = response.data.data;
+      const response = await axiosApp.get("/user-space?userId=" + user?.id);
+      console.log("Fetched following spaces:", response.data.data);
+      const data: SpaceDto[] = response.data.data.map(
+        (item: { space: SpaceDto }) => item.space
+      );
+      console.log("Mapped following spaces:", data);
       set({ followingSpaces: data });
       return true;
     } catch {
