@@ -7,11 +7,13 @@ interface AppAvatarProps {
   avatarType?: string | null;
 }
 export function AppAvatarUser({ name, username, avatarType }: AppAvatarProps) {
+  username = username || "anonymous";
+  avatarType = avatarType || "notionists";
   return (
     <>
       <Avatar>
         <AvatarImage
-          src={getAvatar(username ?? "", avatarType ?? "notionists")}
+          src={getAvatar(username, avatarType)}
           alt={name ?? ""}
           className="rounded-full size-8"
         />

@@ -37,8 +37,14 @@ export function middleware(request: NextRequest) {
 
         return NextResponse.redirect(new URL('/login', request.url))
     }
+    const response = NextResponse.next();
 
-    return NextResponse.next()
+    response.cookies.set('user', token, {
+        path: '/',
+        httpOnly: false,
+    });
+
+    return response;
 }
 
 export const config = {

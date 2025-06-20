@@ -1,5 +1,3 @@
-"use client";
-
 import { ChevronsUpDown, LogOut, User2 } from "lucide-react";
 import {
   Dialog,
@@ -27,11 +25,19 @@ import { AppAvatarUser } from "@/components/app-avatar-user/AppAvatarUser";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { UseAuthStore } from "@/app/store/useAuthStore";
+import { getUserFromClientCookie } from "@/utils/getUser";
+import { useEffect, useState } from "react";
+import { UserDto } from "@/dto/userDto";
 
 export function NavUser() {
   const router = useRouter();
   const { logout, deleteAccount } = UseAuthStore();
-  const user = JSON.parse("{}");
+  const [user, setUser] = useState<UserDto | null>(null);
+
+  useEffect(() => {
+    const u = getUserFromClientCookie();
+    setUser(u);
+  }, []);
 
   const handleDeleteAccount = async () => {
     const result = await deleteAccount();
@@ -57,13 +63,13 @@ export function NavUser() {
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <AppAvatarUser
-                name={user.name}
-                username={user.username}
-                avatarType={user.avatarType}
+                name={user?.name}
+                username={user?.username}
+                avatarType={user?.avatar_type}
               />
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">{user.name}</span>
-                <span className="truncate text-xs">{user.username}</span>
+                <span className="truncate font-semibold">{user?.name}</span>
+                <span className="truncate text-xs">{user?.username}</span>
               </div>
               <ChevronsUpDown className="ml-auto size-4" />
             </SidebarMenuButton>
@@ -77,31 +83,20 @@ export function NavUser() {
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <AppAvatarUser
-                  name={user.name}
-                  username={user.username}
-                  avatarType={user.avatarType}
+                  name={user?.name}
+                  username={user?.username}
+                  avatarType={user?.avatar_type}
                 />
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">{user.name}</span>
-                  <span className="truncate text-xs">{user.username}</span>
+                  <span className="truncate font-semibold">{user?.name}</span>
+                  <span className="truncate text-xs">{user?.username}</span>
                 </div>
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <Button
-                variant="ghost"
-                className="w-full justify-start"
-                size="sm"
-                onClick={() => router.push(`/profile/${user.username}`)}
-              >
-                <User2 />
-                Change Name
-              </Button>
-
-              <DropdownMenuSeparator />
               <Dialog>
-                <DialogTrigger className="w-full justify-start">
+                <DialogTrigger asChild>
                   <Button
                     variant="ghost"
                     className="w-full justify-start"
