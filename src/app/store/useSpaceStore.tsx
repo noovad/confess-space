@@ -1,63 +1,47 @@
 "use client";
 import { create } from "zustand";
-import { SpaceDto } from "@/dto/spaceDto";
+import { SpaceDto, SpaceListResponse } from "@/dto/spaceDto";
 import axiosApp from "@/lib/axiosApp";
 import { AxiosError } from "axios";
 import { toast } from "sonner";
 
 export interface SpaceState {
   loading: boolean;
-  followingSpaces: SpaceDto[];
-  availableSpaces: SpaceDto[];
+  availableSpaces: SpaceListResponse | null;
   availableSpacesSidebar: SpaceDto[];
   space: SpaceDto | null;
-  fetchFollowingSpaces: (userId?: string) => Promise<boolean>;
-  fetchAvailableSpaces: () => Promise<boolean>;
+  havedSpace: boolean;
+  ownSpace: SpaceDto | null;
+  fetchAvailableSpaces: (search?: string, page?: number) => Promise<boolean>;
   fetchAvailableSpacesSidebar: () => Promise<boolean>;
   fetchSpaceBySlug: (slug: string) => Promise<boolean | null>;
+  createSpace: (name: string, description: string) => Promise<boolean>;
+  checkSpaceExistsByOwner: () => Promise<boolean>;
+  fetchOwnSpace: () => Promise<boolean>;
 }
 
 export const useSpaceStore = create<SpaceState>((set) => ({
   loading: false,
-  followingSpaces: [],
-  availableSpaces: [],
+  availableSpaces: null,
   availableSpacesSidebar: [],
   space: null,
+  havedSpace: false,
+  ownSpace: null,
 
-  fetchFollowingSpaces: async (userId) => {
-    if (!userId) {
-      return false;
-    }
-
+  fetchAvailableSpaces: async (search, page) => {
     set({ loading: true });
     try {
-      const response = await axiosApp.get(`/user-space?userId=${userId}`);
-
-      const data: SpaceDto[] = response.data.data.map(
-        (item: { space: SpaceDto }) => item.space
-      );
-
-      set({ followingSpaces: data });
-      return true;
-    } catch (error) {
-      if (error instanceof AxiosError && error.response?.data?.message) {
-        toast.error(error.response.data.message);
-      } else {
-        toast.error(
-          error instanceof AxiosError ? error.message : String(error)
-        );
+      if (!search) {
+        search = "";
       }
-      return false;
-    } finally {
-      set({ loading: false });
-    }
-  },
+      if (!page) {
+        page = 1;
+      }
 
-  fetchAvailableSpaces: async () => {
-    set({ loading: true });
-    try {
-      const response = await axiosApp.get("/space");
-      const data: SpaceDto[] = response.data.data;
+      const response = await axiosApp.get(
+        `/space?search=${search}&limit=10&page=${page}`
+      );
+      const data: SpaceListResponse = response.data.data;
       set({ availableSpaces: data });
       return true;
     } catch (error) {
@@ -78,8 +62,8 @@ export const useSpaceStore = create<SpaceState>((set) => ({
     set({ loading: true });
     try {
       const response = await axiosApp.get("/space?isSuggest=true");
-      const data: SpaceDto[] = response.data.data;
-      set({ availableSpacesSidebar: data });
+      const data: SpaceListResponse = response.data.data;
+      set({ availableSpacesSidebar: data.spaces });
       return true;
     } catch (error) {
       if (error instanceof AxiosError && error.response?.data?.message) {
@@ -112,6 +96,63 @@ export const useSpaceStore = create<SpaceState>((set) => ({
       return false;
     } finally {
       set({ loading: false });
+    }
+  },
+
+  createSpace: async (name, description) => {
+    set({ loading: true });
+    try {
+      await axiosApp.post("/space", {
+        name,
+        description,
+      });
+      toast.success("Space created successfully");
+      return true;
+    } catch (error) {
+      if (error instanceof AxiosError && error.response?.data?.message) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error(
+          error instanceof AxiosError ? error.message : String(error)
+        );
+      }
+      return false;
+    } finally {
+      set({ loading: false });
+    }
+  },
+
+  checkSpaceExistsByOwner: async () => {
+    try {
+      const response = await axiosApp.get("/space/exists");
+      set({ havedSpace: response.data.data === true });
+      return true;
+    } catch (error) {
+      if (error instanceof AxiosError && error.response?.data?.message) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error(
+          error instanceof AxiosError ? error.message : String(error)
+        );
+      }
+      return false;
+    }
+  },
+
+  fetchOwnSpace: async () => {
+    try {
+      const response = await axiosApp.get(`/space/own`);
+      set({ ownSpace: response.data.data });
+      return true;
+    } catch (error) {
+      if (error instanceof AxiosError && error.response?.data?.message) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error(
+          error instanceof AxiosError ? error.message : String(error)
+        );
+      }
+      return false;
     }
   },
 }));

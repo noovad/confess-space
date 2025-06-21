@@ -16,13 +16,18 @@ import { useEffect } from "react";
 
 export function AvailableSpaces() {
   const pathname = usePathname();
-  const { availableSpacesSidebar: spaces, fetchAvailableSpacesSidebar } =
-    useSpaceStore();
+  const {
+    availableSpacesSidebar: spaces,
+    fetchAvailableSpacesSidebar,
+    ownSpace,
+    fetchOwnSpace,
+  } = useSpaceStore();
 
   useEffect(() => {
     fetchAvailableSpacesSidebar();
-  },[]);
-  
+    fetchOwnSpace();
+  }, []);
+
   return (
     <SidebarGroup>
       <SidebarGroupContent>
@@ -30,30 +35,33 @@ export function AvailableSpaces() {
           <p className=" ps-2 pt-2 text-xs text-muted-foreground">
             Available Spaces
           </p>
-          {spaces.map((item) => (
-            <SidebarMenuItem key={item.name}>
-              <SidebarMenuButton
-                asChild
-                className={cn(
-                  "flex justify-between items-center w-full hover:bg-white",
-                  "data-[active=true]:bg-black"
-                )}
-                isActive={isSpaceActive(pathname, item.slug)}
-              >
-                <Link href={"/space/" + item.slug}>
-                  <span
-                    className={
-                      isSpaceActive(pathname, item.slug)
-                        ? "text-white"
-                        : undefined
-                    }
+          {spaces &&
+            spaces
+              .filter((item) => !(ownSpace && item.slug === ownSpace.slug))
+              .map((item) => (
+                <SidebarMenuItem key={item.name}>
+                  <SidebarMenuButton
+                    asChild
+                    className={cn(
+                      "flex justify-between items-center w-full hover:bg-white",
+                      "data-[active=true]:bg-black"
+                    )}
+                    isActive={isSpaceActive(pathname, item.slug)}
                   >
-                    {item.name}
-                  </span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          ))}
+                    <Link href={"/space/" + item.slug}>
+                      <span
+                        className={
+                          isSpaceActive(pathname, item.slug)
+                            ? "text-white"
+                            : undefined
+                        }
+                      >
+                        {item.name}
+                      </span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
         </SidebarMenu>
         <SidebarMenu>
           <SidebarMenuItem className="pb-4 pt-2">

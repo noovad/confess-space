@@ -1,73 +1,70 @@
 "use client";
 
 import { useState } from "react";
-import { toast } from "sonner";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Plus } from "lucide-react";
-import { Button } from "../../../../components/ui/button";
-
-const hasUserCreatedSpace = false;
+import { Button } from "@/components/ui/button";
+import { useSpaceStore } from "@/app/store/useSpaceStore";
 
 export function CreateSpaceDialog() {
+  const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [isOpen, setIsOpen] = useState(false);
+  const [nameError, setNameError] = useState<string | null>(null);
+  const { createSpace } = useSpaceStore();
 
-  const handleSubmit = () => {
-    if (!name.trim()) {
-      toast.error("Space name required", {
-        description: "Please provide a name for your space.",
-      });
-      return;
-    }
-
-    toast.success("Space created!", {
-      description: `Your space "${name}" has been created successfully.`,
-    });
-
-    setName("");
-    setDescription("");
-    setIsOpen(false);
+  const validateName = (value: string) => {
+    if (!value.trim()) return "Name is required";
+    if (value.trim().length < 3) return "Name must be at least 3 characters";
+    return null;
   };
 
-  const handleOpenChange = (open: boolean) => {
-    if (open && hasUserCreatedSpace) {
-      toast.error("Limit reached", {
-        description: "You can only create one space per account.",
-      });
-      return;
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setName(value);
+    setNameError(validateName(value));
+  };
+
+  const handleSubmit = async () => {
+    const error = validateName(name);
+    setNameError(error);
+    if (error) return;
+    const result = await createSpace(name, description);
+    if (result) {
+      
+      setName("");
+      setDescription("");
+      setOpen(false);
+      setNameError(null);
     }
-    setIsOpen(open);
   };
 
   return (
-    <AlertDialog open={isOpen} onOpenChange={handleOpenChange}>
-      <AlertDialogTrigger asChild>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
         <Button size={"sm"} variant="outline">
           <Plus />
           <span>Add Space</span>
         </Button>
-      </AlertDialogTrigger>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Create a New Space</AlertDialogTitle>
-          <AlertDialogDescription>
+      </DialogTrigger>
+      <DialogContent showCloseButton={false}>
+        <DialogHeader>
+          <DialogTitle>Create a New Space</DialogTitle>
+          <DialogDescription>
             Create your own space to share thoughts and connect with others.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
+          </DialogDescription>
+        </DialogHeader>
 
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
@@ -75,9 +72,12 @@ export function CreateSpaceDialog() {
             <Input
               id="space-name"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={handleNameChange}
               placeholder="Enter space name"
             />
+            {nameError && (
+              <span className="text-sm text-red-500">{nameError}</span>
+            )}
           </div>
 
           <div className="grid gap-2">
@@ -92,11 +92,26 @@ export function CreateSpaceDialog() {
           </div>
         </div>
 
-        <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={handleSubmit}>Create</AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+        <DialogFooter>
+          <Button
+            variant="outline"
+            onClick={() => {
+              setOpen(false);
+              setName("");
+              setDescription("");
+              setNameError("");
+            }}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleSubmit}
+            disabled={!!nameError || name.trim() === ""}
+          >
+            Create
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

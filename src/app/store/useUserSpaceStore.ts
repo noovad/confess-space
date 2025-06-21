@@ -5,9 +5,12 @@ import { toast } from 'sonner';
 import { AxiosError } from 'axios';
 
 interface UserSpaceStore {
+    followingSpaces: SpaceDto[];
     userSpaces: SpaceDto[];
     space: SpaceDto | null;
     isMemberOf: boolean;
+    fetchFollowingSpaces: (userId?: string) => Promise<boolean>;
+
     fetchUserSpaces: (spaceId: string, userId: string) => Promise<boolean>;
     checkUserInSpace: (spaceId: string, userId: string) => Promise<boolean>;
     joinToSpace: (spaceId: string, userId: string) => Promise<boolean>;
@@ -19,9 +22,39 @@ export const useUserSpaceStore = create<UserSpaceStore & {
     loading?: boolean;
     fetchAvailableSpaces?: () => Promise<boolean>;
 }>((set) => ({
+    followingSpaces: [],
     userSpaces: [],
     space: null,
     isMemberOf: false,
+
+    fetchFollowingSpaces: async (userId) => {
+        if (!userId) {
+            return false;
+        }
+
+        set({ loading: true });
+        try {
+            const response = await axiosApp.get(`/user-space?userId=${userId}`);
+
+            const data: SpaceDto[] = response.data.data.map(
+                (item: { space: SpaceDto }) => item.space
+            );
+
+            set({ followingSpaces: data });
+            return true;
+        } catch (error) {
+            if (error instanceof AxiosError && error.response?.data?.message) {
+                toast.error(error.response.data.message);
+            } else {
+                toast.error(
+                    error instanceof AxiosError ? error.message : String(error)
+                );
+            }
+            return false;
+        } finally {
+            set({ loading: false });
+        }
+    },
 
     fetchUserSpaces: async (spaceId, userId) => {
         try {

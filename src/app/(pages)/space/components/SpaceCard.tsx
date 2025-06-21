@@ -14,7 +14,7 @@ export const SpaceCard = ({ space }: SpaceCardProps) => {
         <h2 className="text-lg font-semibold">{space.name}</h2>
         <p className="text-sm text-gray-600">{space.description}</p>
         <p className="text-xs text-gray-500 mt-2">
-          {(space.member_count)} member
+          {(space.member_count + 1)} member
         </p>
       </div>
     </Link>

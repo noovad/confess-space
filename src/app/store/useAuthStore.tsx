@@ -89,6 +89,7 @@ export const UseAuthStore = create<AuthState>((set) => ({
           error instanceof AxiosError ? error.message : String(error)
         );
       }
+
       return false;
     } finally {
       set({ loading: false });

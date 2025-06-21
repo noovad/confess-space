@@ -8,3 +8,12 @@ export interface SpaceDto {
   created_at?: string;
   updated_at?: string;
 }
+
+export interface SpaceListResponse {
+  spaces: SpaceDto[];
+  total: number;
+  limit: number;
+  page: number;
+  total_pages: number;
+}
+

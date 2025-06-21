@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { MessageSquare } from "lucide-react";
 import { toast } from "sonner";
@@ -12,46 +12,49 @@ import { UseAuthStore } from "@/app/store/useAuthStore";
 
 export function LoginForm() {
   const router = useRouter();
-  const [username, setUsername] = useState("test");
-  const [password, setPassword] = useState("12345678");
-  const [usernameError, setUsernameError] = useState<string | null>(null);
+  const [username, setUsername] = useState("user");
+  const [password, setPassword] = useState("12312344");
+  const [error, setError] = useState<string | null>(null);
+  const [hasInteracted, setHasInteracted] = useState(false);
   const { login, loginWithGoogle, loading, loadingRedirect } = UseAuthStore();
 
-  const validateUsername = (value: string) => {
-    const regex = /^[a-z0-9](?!.*[_.]{2})[a-z0-9._]{1,18}[a-z0-9]$/;
+  useEffect(() => {
+    const validate = () => {
+      const usernameRegex = /^[a-z0-9](?!.*[_.]{2})[a-z0-9._]{1,18}[a-z0-9]$/;
 
-    if (!value) {
-      setUsernameError(null);
-      return;
-    }
+      if (!username.trim()) {
+        setError("Username is required");
+        return;
+      }
 
-    if (value.length < 3) {
-      setUsernameError("Username must be at least 3 characters");
-    } else if (value.length > 20) {
-      setUsernameError("Username must be less than 20 characters");
-    } else if (value.includes(" ")) {
-      setUsernameError("Username cannot contain spaces");
-    } else if (!/^[a-z0-9._]+$/.test(value)) {
-      setUsernameError(
-        "Only lowercase letters, numbers, dots, and underscores allowed"
-      );
-    } else if (!regex.test(value)) {
-      setUsernameError("Invalid username format");
-    } else {
-      setUsernameError(null);
+      if (
+        !usernameRegex.test(username) ||
+        username.length < 3 ||
+        username.length > 20
+      ) {
+        setError("Username must be 3–20 characters, lowercase, no spaces.");
+        return;
+      }
+
+      if (!password.trim()) {
+        setError("Password is required");
+        return;
+      }
+
+      setError(null);
+    };
+
+    if (hasInteracted) {
+      validate();
     }
-  };
+  }, [username, password, hasInteracted]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!username.trim() || !password.trim()) {
-      toast.error("Please fill in all fields");
-      return;
-    }
+    setHasInteracted(true);
 
-    const regex = /^[a-z0-9](?!.*[_.]{2})[a-z0-9._]{1,18}[a-z0-9]$/;
-    if (!regex.test(username) || username.length < 3 || username.length > 20) {
-      toast.error("Username must be 3–20 characters, lowercase, no spaces.");
+    if (error) {
+      toast.error(error);
       return;
     }
 
@@ -62,7 +65,10 @@ export function LoginForm() {
   };
 
   const handleGoogleLogin = async () => {
-    await loginWithGoogle();
+    const result = await loginWithGoogle();
+    if (!result) {
+      router.push("/login");
+    }
   };
 
   return (
@@ -85,16 +91,12 @@ export function LoginForm() {
                 placeholder="your_username"
                 value={username}
                 onChange={(e) => {
-                  const value = e.target.value;
-                  setUsername(value);
-                  validateUsername(value);
+                  setUsername(e.target.value);
+                  setHasInteracted(true);
                 }}
-                className={usernameError ? "border-red-500" : ""}
+                className={error && hasInteracted ? "border-red-500" : ""}
                 required
               />
-              {usernameError && (
-                <p className="text-red-500 text-xs">{usernameError}</p>
-              )}
             </div>
             <div className="grid gap-3">
               <Label htmlFor="password">Password</Label>
@@ -102,11 +104,22 @@ export function LoginForm() {
                 id="password"
                 type="password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  setHasInteracted(true);
+                }}
+                className={error && hasInteracted ? "border-red-500" : ""}
                 required
               />
             </div>
-            <Button type="submit" className="w-full" disabled={loading}>
+            {hasInteracted && error && (
+              <p className="text-red-500 text-xs mt-2">{error}</p>
+            )}
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={loading || (hasInteracted && !!error)}
+            >
               {loading ? "Logging in..." : "Login"}
             </Button>
           </div>

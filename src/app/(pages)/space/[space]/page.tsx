@@ -23,12 +23,9 @@ export default function SpacePage() {
   const [user, setUser] = useState<UserDto | null>(null);
   const { space, fetchSpaceBySlug } = useSpaceStore();
   const pathname = usePathname();
-  const {
-    isMemberOf,
-    checkUserInSpace,
-    joinToSpace,
-    leaveFromSpace,
-  } = useUserSpaceStore();
+  const [isOwner, setIsOwner] = useState(false);
+  const { isMemberOf, checkUserInSpace, joinToSpace, leaveFromSpace } =
+    useUserSpaceStore();
 
   useEffect(() => {
     const u = getUserFromClientCookie();
@@ -44,6 +41,9 @@ export default function SpacePage() {
 
       const currentUser = u;
       const currentSpace = useSpaceStore.getState().space;
+      if (currentSpace?.owner_id === currentUser?.id) {
+        setIsOwner(true);
+      }
       if (currentUser?.id && currentSpace?.id) {
         checkUserInSpace(currentSpace.id, currentUser.id);
       }
@@ -89,7 +89,7 @@ export default function SpacePage() {
             <h1 className="text-xl font-bold">{space?.name}</h1>
             <div className="flex items-center gap-3">
               <span className="text-xs text-muted-foreground">
-                {space?.member_count}
+                {(space?.member_count ?? 0) + 1} member
               </span>
               <span className="text-xs text-muted-foreground">•</span>
               <span className="text-xs text-muted-foreground">
@@ -97,11 +97,12 @@ export default function SpacePage() {
               </span>
             </div>
           </div>
-          {isMemberOf ? (
-            <LeaveSpaceDialog onLeave={handleLeaveSpace} />
-          ) : (
-            <JoinSpaceDialog onJoin={handleJoinSpace} />
-          )}
+          {!isOwner &&
+            (isMemberOf ? (
+              <LeaveSpaceDialog onLeave={handleLeaveSpace} />
+            ) : (
+              <JoinSpaceDialog onJoin={handleJoinSpace} />
+            ))}
         </Card>
 
         <div
@@ -132,18 +133,19 @@ export default function SpacePage() {
             );
           })}
         </div>
-        {isMemberOf && (
-          <div className="pt-8 flex gap-4 justify-center items-center">
-            <Textarea
-              placeholder="Type your message here."
-              className="resize-none"
-              spellCheck="false"
-            />
-            <Button size="icon">
-              <Send />
-            </Button>
-          </div>
-        )}
+        {isMemberOf ||
+          (isOwner && (
+            <div className="pt-8 flex gap-4 justify-center items-center">
+              <Textarea
+                placeholder="Type your message here."
+                className="resize-none"
+                spellCheck="false"
+              />
+              <Button size="icon">
+                <Send />
+              </Button>
+            </div>
+          ))}
       </section>
     </main>
   );
