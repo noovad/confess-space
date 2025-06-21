@@ -25,7 +25,7 @@ export const useSpaceStore = create<SpaceState>((set) => ({
   availableSpaces: null,
   availableSpacesSidebar: [],
   space: null,
-  havedSpace: false,
+  havedSpace: true,
   ownSpace: null,
 
   fetchAvailableSpaces: async (search, page) => {
@@ -125,7 +125,7 @@ export const useSpaceStore = create<SpaceState>((set) => ({
   checkSpaceExistsByOwner: async () => {
     try {
       const response = await axiosApp.get("/space/exists");
-      set({ havedSpace: response.data.data === true });
+      set({ havedSpace: response.data.data.exists === true });
       return true;
     } catch (error) {
       if (error instanceof AxiosError && error.response?.data?.message) {

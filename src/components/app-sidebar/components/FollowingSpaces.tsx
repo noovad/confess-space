@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 import { useEffect } from "react";
 import Link from "next/link";
@@ -24,7 +25,6 @@ export function FollowingSpaces() {
       fetchFollowingSpaces(u.id);
     }
     fetchOwnSpace();
-    console.log(ownSpace);
   }, []);
 
   return (

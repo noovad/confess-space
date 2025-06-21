@@ -9,8 +9,6 @@ const axiosApp = axios.create({
 axiosApp.interceptors.response.use(
     response => response,
     async error => {
-        console.log("Axios error intercepted:", error);
-
         if (error.response && error.response.status === 401) {
             try {
                 await axiosAuth.post("/logout").catch(() => { });
