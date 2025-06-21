@@ -31,7 +31,7 @@ export function FollowingSpaces() {
     <SidebarGroup className="overflow-auto group-data-[collapsible=icon]:hidden">
       <hr className="mb-4 border-black border-t-2" />
       <SidebarMenu className="overflow-y-auto mt-2">
-        {ownSpace && (
+        {ownSpace?.name && (
           <SidebarMenuItem>
             <p className="ps-2 pt-2 text-xs text-muted-foreground">My Spaces</p>
             <SidebarMenuButton

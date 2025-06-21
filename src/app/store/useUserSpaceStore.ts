@@ -35,7 +35,6 @@ export const useUserSpaceStore = create<UserSpaceStore & {
         set({ loading: true });
         try {
             const response = await axiosApp.get(`/user-space?userId=${userId}`);
-
             const data: SpaceDto[] = response.data.data.map(
                 (item: { space: SpaceDto }) => item.space
             );
