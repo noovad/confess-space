@@ -61,7 +61,7 @@ export default function SpacePage() {
       const result = await joinToSpace(space.id, user.id);
       if (result) {
         checkUserInSpace(space.id, user.id);
-        await useSpaceStore.getState().fetchFollowingSpaces(user.id);
+        await useUserSpaceStore.getState().fetchFollowingSpaces(user.id);
         await useSpaceStore.getState().fetchAvailableSpacesSidebar();
       }
     }
@@ -72,7 +72,7 @@ export default function SpacePage() {
       const result = await leaveFromSpace(space.id);
       if (result) {
         checkUserInSpace(space.id, user.id);
-        await useSpaceStore.getState().fetchFollowingSpaces(user.id);
+        await useUserSpaceStore.getState().fetchFollowingSpaces(user.id);
         await useSpaceStore.getState().fetchAvailableSpacesSidebar();
       }
     }
