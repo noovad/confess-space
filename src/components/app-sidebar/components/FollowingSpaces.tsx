@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -12,23 +12,17 @@ import {
 import { isSpaceActive } from "@/utils/sidebar-utils";
 import { useSpaceStore } from "@/app/store/useSpaceStore";
 import { getUserFromClientCookie } from "@/utils/getUser";
-import { UserDto } from "@/dto/userDto";
 
 export function FollowingSpaces() {
   const { followingSpaces, fetchFollowingSpaces } = useSpaceStore();
   const pathname = usePathname();
-  const [user, setUser] = useState<UserDto | null>(null);
 
   useEffect(() => {
     const u = getUserFromClientCookie();
-    setUser(u);
-  }, []);
-
-  useEffect(() => {
-    if (user?.id) {
-      fetchFollowingSpaces(user.id);
+    if (u?.id) {
+      fetchFollowingSpaces(u.id);
     }
-  }, [fetchFollowingSpaces, user?.id]);
+  }, []);
 
   return (
     <SidebarGroup className="overflow-auto group-data-[collapsible=icon]:hidden">

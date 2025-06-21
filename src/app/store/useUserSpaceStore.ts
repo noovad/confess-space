@@ -25,10 +25,22 @@ export const useUserSpaceStore = create<UserSpaceStore & {
 
     fetchUserSpaces: async (spaceId, userId) => {
         try {
-            const response = await axiosApp.get(`/user-space?userId=${userId}&spaceId=${spaceId}`);
+            if (!userId && !spaceId) {
+                toast.error('User ID atau Space ID harus diisi.');
+                return false;
+            }
+            let query = '';
+            if (userId && spaceId) {
+                query = `?userId=${userId}&spaceId=${spaceId}`;
+            } else if (userId) {
+                query = `?userId=${userId}`;
+            } else if (spaceId) {
+                query = `?spaceId=${spaceId}`;
+            }
+            const response = await axiosApp.get(`/user-space${query}`);
             const spaces = response.data.data.map((item: { space: SpaceDto }) => item.space) as SpaceDto[];
             set({ userSpaces: spaces });
-            return false;
+            return true;
         } catch (error) {
             if (error instanceof AxiosError && error.response?.data?.message) {
                 toast.error(error.response.data.message);
@@ -60,10 +72,9 @@ export const useUserSpaceStore = create<UserSpaceStore & {
 
     joinToSpace: async (spaceId: string, userId: string) => {
         try {
-            console.log('Joining space:', spaceId, 'for user:', userId);
             await axiosApp.post(`user-space`, { space_id: spaceId, user_id: userId });
             toast.success('You have joined the space successfully.');
-            return false;
+            return true;
         } catch (error) {
             if (error instanceof AxiosError && error.response?.data?.message) {
                 toast.error(error.response.data.message);
@@ -80,7 +91,7 @@ export const useUserSpaceStore = create<UserSpaceStore & {
         try {
             await axiosApp.delete(`user-space/${spaceId}`);
             toast.success('You have left the space successfully.');
-            return false;
+            return true;
         } catch (error) {
             if (error instanceof AxiosError && error.response?.data?.message) {
                 toast.error(error.response.data.message);

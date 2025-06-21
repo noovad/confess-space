@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
@@ -14,17 +15,17 @@ import { UserDto } from "@/dto/userDto";
 import { getUserFromClientCookie } from "@/utils/getUser";
 import { useSpaceStore } from "@/app/store/useSpaceStore";
 import { useUserSpaceStore } from "@/app/store/useUserSpaceStore";
+import { usePathname, useRouter } from "next/navigation";
 
 export default function SpacePage() {
+  const router = useRouter();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [user, setUser] = useState<UserDto | null>(null);
   const { space, fetchSpaceBySlug } = useSpaceStore();
-  const pathname = window.location.pathname;
+  const pathname = usePathname();
   const {
     isMemberOf,
     checkUserInSpace,
-    fetchUserSpaces,
-    userSpaces,
     joinToSpace,
     leaveFromSpace,
   } = useUserSpaceStore();
@@ -32,36 +33,36 @@ export default function SpacePage() {
   useEffect(() => {
     const u = getUserFromClientCookie();
     setUser(u);
-  }, []);
+    const slug = pathname.split("/")[2];
 
-  useEffect(() => {
-    fetchSpaceBySlug(pathname.split("/")[2]);
-    console.log("Fetching space by slug:", pathname.split("/")[2]);
-  }, [pathname, fetchSpaceBySlug]);
+    const fetchData = async () => {
+      const result = await fetchSpaceBySlug(slug);
+      if (!result) {
+        router.push("/");
+        return;
+      }
 
-  useEffect(() => {
-    if (user?.id && space?.id) {
-      checkUserInSpace(space.id, user.id);
-    }
-  }, [user, space, checkUserInSpace]);
+      const currentUser = u;
+      const currentSpace = useSpaceStore.getState().space;
+      if (currentUser?.id && currentSpace?.id) {
+        checkUserInSpace(currentSpace.id, currentUser.id);
+      }
+    };
 
-  useEffect(() => {
-    if (space?.id) {
-      fetchUserSpaces(space.id, "");
-    }
-  }, [space, fetchUserSpaces]);
-
-  useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  });
+
+    fetchData();
+  }, []);
 
   const handleJoinSpace = async () => {
     if (space?.id && user?.id) {
       const result = await joinToSpace(space.id, user.id);
       if (result) {
-        console.log("User joined space:", space.name);
+        checkUserInSpace(space.id, user.id);
+        await useSpaceStore.getState().fetchFollowingSpaces(user.id);
+        await useSpaceStore.getState().fetchAvailableSpacesSidebar();
       }
     }
   };
@@ -70,7 +71,9 @@ export default function SpacePage() {
     if (space?.id && user?.id) {
       const result = await leaveFromSpace(space.id);
       if (result) {
-        console.log("User left space:", space.name);
+        checkUserInSpace(space.id, user.id);
+        await useSpaceStore.getState().fetchFollowingSpaces(user.id);
+        await useSpaceStore.getState().fetchAvailableSpacesSidebar();
       }
     }
   };
@@ -86,7 +89,7 @@ export default function SpacePage() {
             <h1 className="text-xl font-bold">{space?.name}</h1>
             <div className="flex items-center gap-3">
               <span className="text-xs text-muted-foreground">
-                {userSpaces.length}
+                {space?.member_count}
               </span>
               <span className="text-xs text-muted-foreground">•</span>
               <span className="text-xs text-muted-foreground">

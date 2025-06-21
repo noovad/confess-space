@@ -13,7 +13,7 @@ export function UserList() {
               <AppAvatarUser
                 name={user.name}
                 username={user.username}
-                avatarType={user.avatarType}
+                avatarType={user.avatar_type}
               />
               <div className="flex-auto">
                 <p className="text-sm/6 truncate font-semibold text-gray-900">

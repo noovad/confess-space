@@ -12,25 +12,17 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { isSpaceActive } from "@/utils/sidebar-utils";
 import { useSpaceStore } from "@/app/store/useSpaceStore";
-import { useEffect, useState } from "react";
-import { UserDto } from "@/dto/userDto";
-import { getUserFromClientCookie } from "@/utils/getUser";
+import { useEffect } from "react";
 
 export function AvailableSpaces() {
   const pathname = usePathname();
-  const { availableSpaces, fetchAvailableSpaces } = useSpaceStore();
-  const [user, setUser] = useState<UserDto | null>(null);
+  const { availableSpacesSidebar: spaces, fetchAvailableSpacesSidebar } =
+    useSpaceStore();
 
   useEffect(() => {
-    const u = getUserFromClientCookie();
-    setUser(u);
-  }, []);
-
-  useEffect(() => {
-    if (user?.id) {
-      fetchAvailableSpaces();
-    }
-  }, [fetchAvailableSpaces, user?.id]);
+    fetchAvailableSpacesSidebar();
+  },[]);
+  
   return (
     <SidebarGroup>
       <SidebarGroupContent>
@@ -38,7 +30,7 @@ export function AvailableSpaces() {
           <p className=" ps-2 pt-2 text-xs text-muted-foreground">
             Available Spaces
           </p>
-          {availableSpaces.map((item) => (
+          {spaces.map((item) => (
             <SidebarMenuItem key={item.name}>
               <SidebarMenuButton
                 asChild

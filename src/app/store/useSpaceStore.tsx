@@ -9,9 +9,11 @@ export interface SpaceState {
   loading: boolean;
   followingSpaces: SpaceDto[];
   availableSpaces: SpaceDto[];
+  availableSpacesSidebar: SpaceDto[];
   space: SpaceDto | null;
   fetchFollowingSpaces: (userId?: string) => Promise<boolean>;
   fetchAvailableSpaces: () => Promise<boolean>;
+  fetchAvailableSpacesSidebar: () => Promise<boolean>;
   fetchSpaceBySlug: (slug: string) => Promise<boolean | null>;
 }
 
@@ -19,6 +21,7 @@ export const useSpaceStore = create<SpaceState>((set) => ({
   loading: false,
   followingSpaces: [],
   availableSpaces: [],
+  availableSpacesSidebar: [],
   space: null,
 
   fetchFollowingSpaces: async (userId) => {
@@ -71,14 +74,32 @@ export const useSpaceStore = create<SpaceState>((set) => ({
     }
   },
 
+  fetchAvailableSpacesSidebar: async () => {
+    set({ loading: true });
+    try {
+      const response = await axiosApp.get("/space?isSuggest=true");
+      const data: SpaceDto[] = response.data.data;
+      set({ availableSpacesSidebar: data });
+      return true;
+    } catch (error) {
+      if (error instanceof AxiosError && error.response?.data?.message) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error(
+          error instanceof AxiosError ? error.message : String(error)
+        );
+      }
+      return false;
+    } finally {
+      set({ loading: false });
+    }
+  },
+
   fetchSpaceBySlug: async (slug) => {
     set({ loading: true });
     try {
       const response = await axiosApp.get(`/space/slug/${slug}`);
-      if (response.data.data) {
-        set({ space: response.data.data });
-        return true;
-      }
+      set({ space: response.data.data });
       return true;
     } catch (error) {
       if (error instanceof AxiosError && error.response?.data?.message) {

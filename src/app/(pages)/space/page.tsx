@@ -1,9 +1,18 @@
-import { spaces } from "@/data/spaces";
+"use client";
+
 import Head from "next/head";
 import { SpaceCard } from "./components/SpaceCard";
 import { CreateSpaceDialog } from "@/app/(pages)/space/components/CreateSpaceDialog";
+import { useSpaceStore } from "@/app/store/useSpaceStore";
+import { useEffect } from "react";
 
 const SpacesPage = () => {
+  const { availableSpaces, fetchAvailableSpaces } = useSpaceStore();
+
+  useEffect(() => {
+    fetchAvailableSpaces();
+  }, []);
+
   return (
     <>
       <Head>
@@ -17,9 +26,11 @@ const SpacesPage = () => {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {spaces.map((space) => (
-            <SpaceCard key={space.slug} space={space} />
-          ))}
+          {availableSpaces.map(
+            (space) => (
+              (<SpaceCard key={space.slug} space={space} />)
+            )
+          )}
         </div>
       </main>
     </>
