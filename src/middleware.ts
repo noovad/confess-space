@@ -1,49 +1,54 @@
-import { NextRequest, NextResponse } from "next/server";
-import { jwtVerify } from "jose";
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
+import { jwtDecode } from 'jwt-decode'
 
-const AUTH_PATHS = ["/login", "/sign-up"];
+const GUEST_PATHS = ['/login', '/sign-up', '/callback']
 
-export async function middleware(req: NextRequest) {
-    const { pathname } = req.nextUrl;
-    const token = req.cookies.get("Authorization")?.value;
+interface JwtPayload {
+    exp?: number
+}
 
-    if (AUTH_PATHS.includes(pathname)) {
-        if (token) {
-            try {
-                const secret = new TextEncoder().encode(process.env.AUTHORIZATION_TOKEN!);
-                const { payload } = await jwtVerify(token, secret);
-
-                if (payload && (!payload.exp || Date.now() < payload.exp * 1000)) {
-                    return NextResponse.redirect(new URL("/space", req.url));
-                }
-            } catch (err) {
-
-                console.error("Middleware auth error:", err);
-                return NextResponse.next();
-            }
-        }
-        return NextResponse.next();
-    }
-
-    if (!token) {
-        return NextResponse.redirect(new URL("/login", req.url));
-    }
-
+function isValidToken(token: string): boolean {
     try {
-        const secret = new TextEncoder().encode(process.env.AUTHORIZATION_TOKEN!);
-        const { payload } = await jwtVerify(token, secret);
-
-        if (payload.exp && Date.now() >= payload.exp * 1000) {
-            throw new Error("Token expired");
-        }
-
-        return NextResponse.next();
-    } catch (err) {
-        console.error("Middleware auth error:", err);
-        return NextResponse.redirect(new URL("/login", req.url));
+        const decoded = jwtDecode<JwtPayload>(token)
+        return !!decoded.exp && Date.now() < decoded.exp * 1000
+    } catch {
+        return false
     }
 }
 
+export function middleware(request: NextRequest) {
+    const pathname = request.nextUrl.pathname
+
+    const token = request.cookies.get('access_token')?.value
+
+    if (GUEST_PATHS.some(path => pathname.startsWith(path))) {
+        if (token && isValidToken(token)) {
+            return NextResponse.redirect(new URL('/', request.url))
+        }
+        return NextResponse.next()
+    }
+
+    if (!token || !isValidToken(token)) {
+        const refreshToken = request.cookies.get('refresh_token')?.value
+        if (refreshToken) {
+            return NextResponse.next()
+        }
+
+        return NextResponse.redirect(new URL('/login', request.url))
+    }
+    const response = NextResponse.next();
+
+    response.cookies.set('user', token, {
+        path: '/',
+        httpOnly: false,
+    });
+
+    return response;
+}
+
 export const config = {
-    matcher: ["/", "/space", "/space/:path*", "/login", "/sign-up"],
-};
+    matcher: [
+        '/((?!api|_next/static|_next/image|favicon.ico|public/).*)',
+    ],
+}

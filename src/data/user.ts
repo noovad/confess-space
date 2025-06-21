@@ -5,7 +5,7 @@ export const userLogin: UserDto = {
   username: "shadcn",
   name: "Shad CN",
   email: "m@example.com",
-  avatarType: "notionists",
+  avatar_type: "notionists",
 };
 
 export const user1: UserDto = {
@@ -13,7 +13,7 @@ export const user1: UserDto = {
   username: "User1",
   name: "Shad CN",
   email: "1@example.com",
-  avatarType: "bottts",
+  avatar_type: "bottts",
 };
 
 export const user2: UserDto = {
@@ -21,5 +21,5 @@ export const user2: UserDto = {
   username: "alex_dev",
   name: "Alex Developer",
   email: "2@example.com",
-  avatarType: "dylan",
+  avatar_type: "dylan",
 };

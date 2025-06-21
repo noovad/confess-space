@@ -1,9 +1,7 @@
-"use client";
-
 import { create } from "zustand";
 import { toast } from "sonner";
 import { AxiosError } from "axios";
-import { axiosAuthInstance } from "@/lib/axios";
+import axiosAuth from "@/lib/axiosAuth";
 
 interface AuthState {
   loading: boolean;
@@ -17,20 +15,31 @@ interface AuthState {
     email: string
   ) => Promise<boolean>;
   logout: () => Promise<boolean>;
+  deleteAccount: () => Promise<boolean>;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
+export const UseAuthStore = create<AuthState>((set) => ({
   loading: false,
   loadingRedirect: false,
+  token: null,
 
   login: async (username, password) => {
     set({ loading: true });
     try {
-      await axiosAuthInstance.post("/login", { username, password });
+      await axiosAuth.post("/login", {
+        username,
+        password,
+      });
       toast.success("Login successful!");
       return true;
     } catch (error) {
-      toast.error(error instanceof AxiosError ? error.message : String(error));
+      if (error instanceof AxiosError && error.response?.data?.message) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error(
+          error instanceof AxiosError ? error.message : String(error)
+        );
+      }
       return false;
     } finally {
       set({ loading: false });
@@ -40,16 +49,22 @@ export const useAuthStore = create<AuthState>((set) => ({
   loginWithGoogle: async () => {
     set({ loadingRedirect: true });
     try {
-      const response = await axiosAuthInstance.get("/auth");
+      const response = await axiosAuth.get("/google");
 
       if (response.data?.data?.url) {
         window.location.href = response.data.data.url;
         return true;
       }
+
       return false;
     } catch (error) {
-      const err = error instanceof AxiosError ? error.message : String(error);
-      toast.error(err);
+      if (error instanceof AxiosError && error.response?.data?.message) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error(
+          error instanceof AxiosError ? error.message : String(error)
+        );
+      }
       return false;
     } finally {
       set({ loadingRedirect: false });
@@ -58,9 +73,8 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   signup: async (username, name, password, email) => {
     set({ loading: true });
-
     try {
-      await axiosAuthInstance.post(`/sign-up?email=${email}`, {
+      await axiosAuth.post(`/sign-up?email=${email}`, {
         username,
         name,
         password,
@@ -68,8 +82,14 @@ export const useAuthStore = create<AuthState>((set) => ({
       toast.success("Signup successful!");
       return true;
     } catch (error) {
-      const err = error instanceof AxiosError ? error.message : String(error);
-      toast.error(err);
+      if (error instanceof AxiosError && error.response?.data?.message) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error(
+          error instanceof AxiosError ? error.message : String(error)
+        );
+      }
+
       return false;
     } finally {
       set({ loading: false });
@@ -79,15 +99,37 @@ export const useAuthStore = create<AuthState>((set) => ({
   logout: async () => {
     set({ loading: true });
     try {
-      await axiosAuthInstance.post("/logout");
+      await axiosAuth.post("/logout");
       toast.success("Logout successful!");
       return true;
     } catch (error) {
-      const err = error instanceof AxiosError ? error.message : String(error);
-      toast.error(err);
+      if (error instanceof AxiosError && error.response?.data?.message) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error(
+          error instanceof AxiosError ? error.message : String(error)
+        );
+      }
       return false;
     } finally {
       set({ loading: false });
+    }
+  },
+
+  deleteAccount: async () => {
+    try {
+      await axiosAuth.delete("/delete-account");
+      toast.success("Account deleted successfully!");
+      return true;
+    } catch (error) {
+      if (error instanceof AxiosError && error.response?.data?.message) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error(
+          error instanceof AxiosError ? error.message : String(error)
+        );
+      }
+      return false;
     }
   },
 }));

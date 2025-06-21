@@ -30,7 +30,7 @@ export default function Chat({ message, nextMessage }: ChatProps) {
         <AppAvatarUser
           name={message.user.name}
           username={message.user.username}
-          avatarType={message.user.avatarType}
+          avatarType={message.user.avatar_type}
         />
       )}
     </div>
@@ -42,7 +42,7 @@ export default function Chat({ message, nextMessage }: ChatProps) {
         <AppAvatarUser
           name={message.user.name}
           username={message.user.username}
-          avatarType={message.user.avatarType}
+          avatarType={message.user.avatar_type}
         />
       )}
       <div className="bg-white border rounded-xl rounded-bl-none py-2 px-4 ms-4">

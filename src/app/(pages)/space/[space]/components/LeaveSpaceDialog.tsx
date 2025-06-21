@@ -11,7 +11,11 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 
-export function LeaveSpaceDialog() {
+type LeaveSpaceDialogProps = {
+  onLeave: () => void;
+};
+
+export function LeaveSpaceDialog({ onLeave }: LeaveSpaceDialogProps) {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
@@ -27,7 +31,7 @@ export function LeaveSpaceDialog() {
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction>Leave</AlertDialogAction>
+          <AlertDialogAction onClick={onLeave}>Leave</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

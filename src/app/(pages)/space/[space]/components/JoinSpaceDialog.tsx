@@ -11,7 +11,9 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 
-export function JoinSpaceDialog() {
+type JoinSpaceDialogProps = { onJoin: () => void };
+
+export function JoinSpaceDialog({ onJoin }: JoinSpaceDialogProps) {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
@@ -27,7 +29,7 @@ export function JoinSpaceDialog() {
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction>Join</AlertDialogAction>
+          <AlertDialogAction onClick={onJoin}>Join</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

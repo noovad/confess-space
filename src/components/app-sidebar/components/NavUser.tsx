@@ -1,12 +1,17 @@
-"use client";
-
 import { ChevronsUpDown, LogOut, User2 } from "lucide-react";
-
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
-  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
@@ -16,19 +21,30 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { UserDto } from "@/dto/userDto";
 import { AppAvatarUser } from "@/components/app-avatar-user/AppAvatarUser";
-import { useAuthStore } from "@/app/store/useAuthStore";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import { UseAuthStore } from "@/app/store/useAuthStore";
+import { getUserFromClientCookie } from "@/utils/getUser";
+import { useEffect, useState } from "react";
+import { UserDto } from "@/dto/userDto";
 
-interface NavUserProps {
-  user: UserDto;
-}
-
-export function NavUser({ user }: NavUserProps) {
+export function NavUser() {
   const router = useRouter();
-  const { logout } = useAuthStore();
+  const { logout, deleteAccount } = UseAuthStore();
+  const [user, setUser] = useState<UserDto | null>(null);
+
+  useEffect(() => {
+    const u = getUserFromClientCookie();
+    setUser(u);
+  }, []);
+
+  const handleDeleteAccount = async () => {
+    const result = await deleteAccount();
+    if (result) {
+      router.push("/login");
+    }
+  };
 
   const handleLogout = async () => {
     const result = await logout();
@@ -47,55 +63,77 @@ export function NavUser({ user }: NavUserProps) {
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <AppAvatarUser
-                name={user.name}
-                username={user.username}
-                avatarType={user.avatarType}
+                name={user?.name}
+                username={user?.username}
+                avatarType={user?.avatar_type}
               />
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">{user.name}</span>
-                <span className="truncate text-xs">{user.username}</span>
+                <span className="truncate font-semibold">{user?.name}</span>
+                <span className="truncate text-xs">{user?.username}</span>
               </div>
               <ChevronsUpDown className="ml-auto size-4" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
             className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
-            side={"right"}
+            side="right"
             align="end"
             sideOffset={4}
           >
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <AppAvatarUser
-                  name={user.name}
-                  username={user.username}
-                  avatarType={user.avatarType}
+                  name={user?.name}
+                  username={user?.username}
+                  avatarType={user?.avatar_type}
                 />
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">{user.name}</span>
-                  <span className="truncate text-xs">{user.username}</span>
+                  <span className="truncate font-semibold">{user?.name}</span>
+                  <span className="truncate text-xs">{user?.username}</span>
                 </div>
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <User2 />
-                Change Name
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start"
+                    size="sm"
+                  >
+                    <User2 />
+                    Delete Account
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Delete your account?</DialogTitle>
+                    <DialogDescription>
+                      Deleting your account is permanent and cannot be undone.
+                      All your data will be removed from our servers. Are you
+                      sure you want to continue?
+                    </DialogDescription>
+                    <DialogFooter className="mt-4">
+                      <Button size="sm" onClick={handleDeleteAccount}>
+                        Delete Account
+                      </Button>
+                    </DialogFooter>
+                  </DialogHeader>
+                </DialogContent>
+              </Dialog>
+
+              <DropdownMenuSeparator />
               <Button
                 variant="ghost"
                 className="w-full justify-start"
-                size={"sm"}
+                size="sm"
                 onClick={handleLogout}
               >
                 <LogOut />
                 Log out
               </Button>
-            </DropdownMenuItem>
+            </DropdownMenuGroup>
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenuItem>

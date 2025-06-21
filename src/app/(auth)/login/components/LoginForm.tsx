@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { MessageSquare } from "lucide-react";
 import { toast } from "sonner";
@@ -8,18 +8,53 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useAuthStore } from "@/app/store/useAuthStore";
+import { UseAuthStore } from "@/app/store/useAuthStore";
 
 export function LoginForm() {
   const router = useRouter();
-  const [username, setUsername] = useState("test");
+  const [username, setUsername] = useState("user");
   const [password, setPassword] = useState("12312344");
-  const { login, loginWithGoogle, loading, loadingRedirect } = useAuthStore();
+  const [error, setError] = useState<string | null>(null);
+  const [hasInteracted, setHasInteracted] = useState(false);
+  const { login, loginWithGoogle, loading, loadingRedirect } = UseAuthStore();
+
+  useEffect(() => {
+    const validate = () => {
+      const usernameRegex = /^[a-z0-9](?!.*[_.]{2})[a-z0-9._]{1,18}[a-z0-9]$/;
+
+      if (!username.trim()) {
+        setError("Username is required");
+        return;
+      }
+
+      if (
+        !usernameRegex.test(username) ||
+        username.length < 3 ||
+        username.length > 20
+      ) {
+        setError("Username must be 3–20 characters, lowercase, no spaces.");
+        return;
+      }
+
+      if (!password.trim()) {
+        setError("Password is required");
+        return;
+      }
+
+      setError(null);
+    };
+
+    if (hasInteracted) {
+      validate();
+    }
+  }, [username, password, hasInteracted]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!username.trim() || !password.trim()) {
-      toast.error("Please fill in all fields");
+    setHasInteracted(true);
+
+    if (error) {
+      toast.error(error);
       return;
     }
 
@@ -30,7 +65,10 @@ export function LoginForm() {
   };
 
   const handleGoogleLogin = async () => {
-    await loginWithGoogle();
+    const result = await loginWithGoogle();
+    if (!result) {
+      router.push("/login");
+    }
   };
 
   return (
@@ -52,7 +90,11 @@ export function LoginForm() {
                 type="text"
                 placeholder="your_username"
                 value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                onChange={(e) => {
+                  setUsername(e.target.value);
+                  setHasInteracted(true);
+                }}
+                className={error && hasInteracted ? "border-red-500" : ""}
                 required
               />
             </div>
@@ -62,11 +104,22 @@ export function LoginForm() {
                 id="password"
                 type="password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  setHasInteracted(true);
+                }}
+                className={error && hasInteracted ? "border-red-500" : ""}
                 required
               />
             </div>
-            <Button type="submit" className="w-full" disabled={loading}>
+            {hasInteracted && error && (
+              <p className="text-red-500 text-xs mt-2">{error}</p>
+            )}
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={loading || (hasInteracted && !!error)}
+            >
               {loading ? "Logging in..." : "Login"}
             </Button>
           </div>

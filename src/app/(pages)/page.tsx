@@ -18,7 +18,7 @@ export default function Home() {
 
         <div className="flex gap-4 flex-col sm:flex-row">
           <Link
-            href="/spaces"
+            href="/space"
             className="rounded-full bg-foreground text-background px-5 py-3 text-sm sm:text-base font-medium hover:bg-[#383838] dark:hover:bg-[#ccc] transition-colors text-center"
           >
             Explore Spaces

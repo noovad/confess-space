@@ -1,47 +1,80 @@
 "use client";
 
-import { useAuthStore } from "@/app/store/useAuthStore";
+import { UseAuthStore } from "@/app/store/useAuthStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 
-// Separate component that uses useSearchParams
 function SignupFormContent() {
   const router = useRouter();
-  const { signup, loading } = useAuthStore();
+  const { signup, loading } = UseAuthStore();
   const [username, setUsername] = useState("");
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
 
-  // Move useSearchParams inside this component
+  const [error, setError] = useState<string | null>(null);
+  const [hasInteracted, setHasInteracted] = useState(false);
+
   const searchParams = useSearchParams();
   const email = searchParams.get("email");
 
+  useEffect(() => {
+    const validate = () => {
+      const usernameRegex = /^[a-z0-9](?!.*[_.]{2})[a-z0-9._]{1,18}[a-z0-9]$/;
+
+      if (
+        !usernameRegex.test(username) ||
+        username.length < 3 ||
+        username.length > 20
+      ) {
+        setError("Username must be 3–20 characters, lowercase, no spaces.");
+        return;
+      }
+
+      if (
+        !username.trim() ||
+        !name.trim() ||
+        !password.trim() ||
+        !confirmPassword.trim()
+      ) {
+        setError("Please fill in all fields");
+        return;
+      }
+
+      if (name.trim().length === 0) {
+        setError("Display name cannot be empty.");
+        return;
+      }
+
+      if (password.length !== 8) {
+        setError("Password must be at least 8 characters.");
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        setError("Passwords do not match");
+        return;
+      }
+
+      setError(null);
+    };
+
+    validate();
+  }, [username, name, password, confirmPassword]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setHasInteracted(true);
+    if (error) return;
 
-    if (
-      !username.trim() ||
-      !name.trim() ||
-      !password.trim() ||
-      !confirmPassword.trim()
-    ) {
-      setError("Please fill in all fields");
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      setError("Passwords do not match");
-      return;
-    }
-
-    const result = await signup(username, name, password, email || "");
+    const result = await signup(username, name, password, email!);
     if (result) {
       router.push("/");
+    } else {
+      router.push("/login");
     }
   };
 
@@ -57,26 +90,27 @@ function SignupFormContent() {
           <Label htmlFor="username">Username</Label>
           <Input
             id="username"
-            name="username"
             type="text"
             placeholder="your_username"
             value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            onChange={(e) => {
+              setUsername(e.target.value);
+              setHasInteracted(true);
+            }}
           />
-          <p className="text-muted-foreground text-xs">
-            This will be your public @username
-          </p>
         </div>
 
         <div className="grid gap-3">
           <Label htmlFor="name">Display Name</Label>
           <Input
             id="name"
-            name="name"
             type="text"
             placeholder="Your Name"
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={(e) => {
+              setName(e.target.value);
+              setHasInteracted(true);
+            }}
           />
         </div>
 
@@ -84,10 +118,12 @@ function SignupFormContent() {
           <Label htmlFor="password">Password</Label>
           <Input
             id="password"
-            name="password"
             type="password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              setHasInteracted(true);
+            }}
           />
         </div>
 
@@ -95,24 +131,31 @@ function SignupFormContent() {
           <Label htmlFor="confirmPassword">Confirm Password</Label>
           <Input
             id="confirmPassword"
-            name="confirmPassword"
             type="password"
             value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
+            onChange={(e) => {
+              setConfirmPassword(e.target.value);
+              setHasInteracted(true);
+            }}
           />
         </div>
 
-        {error && <p className="text-red-500 text-xs mt-2">{error}</p>}
+        {hasInteracted && error && (
+          <p className="text-red-500 text-xs mt-2">{error}</p>
+        )}
 
-        <Button type="submit" disabled={loading} className="w-full mt-2">
-          Create Account
+        <Button
+          type="submit"
+          disabled={loading || !!error}
+          className="w-full mt-2"
+        >
+          {loading ? "Signing up..." : "Create Account"}
         </Button>
       </form>
     </div>
   );
 }
 
-// Main component that wraps the content with Suspense
 export function SignupForm() {
   return (
     <Suspense fallback={<div className="text-center py-6">Loading...</div>}>

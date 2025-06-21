@@ -1,6 +1,6 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
-
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -10,47 +10,57 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { AppSearchForm } from "@/components/app-search-form/AppSearchForm";
-import { SpaceDto } from "@/dto/spaceDto";
 import { isSpaceActive } from "@/utils/sidebar-utils";
 import { useSpaceStore } from "@/app/store/useSpaceStore";
+import { getUserFromClientCookie } from "@/utils/getUser";
+import { useUserSpaceStore } from "@/app/store/useUserSpaceStore";
 
 export function FollowingSpaces() {
-  const { followingSpaces, fetchFollowingSpaces } = useSpaceStore();
-  const [filteredSpaces, setFilteredSpaces] = useState<SpaceDto[]>([]);
+  const { fetchOwnSpace, ownSpace } = useSpaceStore();
   const pathname = usePathname();
-
+  const { followingSpaces, fetchFollowingSpaces } = useUserSpaceStore();
   useEffect(() => {
-    fetchFollowingSpaces();
-  }, [fetchFollowingSpaces]);
-
-  useEffect(() => {
-    setFilteredSpaces(followingSpaces);
-  }, [followingSpaces]);
-
-  const handleSearch = (query: string) => {
-    const q = query.trim().toLowerCase();
-    if (!q) {
-      setFilteredSpaces(followingSpaces);
-      return;
+    const u = getUserFromClientCookie();
+    if (u?.id) {
+      fetchFollowingSpaces(u.id);
     }
-
-    const result = followingSpaces.filter((space) =>
-      space.name.toLowerCase().includes(q)
-    );
-    setFilteredSpaces(result);
-  };
+    fetchOwnSpace();
+  }, []);
 
   return (
     <SidebarGroup className="overflow-auto group-data-[collapsible=icon]:hidden">
       <hr className="mb-4 border-black border-t-2" />
-      <p className="ps-2 pt-2 text-xs text-muted-foreground">
-        Following Spaces
-      </p>
-      <AppSearchForm onSearch={handleSearch} />
       <SidebarMenu className="overflow-y-auto mt-2">
-        {filteredSpaces.length > 0 ? (
-          filteredSpaces.map((space) => (
+        {ownSpace && (
+          <SidebarMenuItem>
+            <p className="ps-2 pt-2 text-xs text-muted-foreground">My Spaces</p>
+            <SidebarMenuButton
+              asChild
+              className={cn(
+                "flex justify-between items-center w-full hover:bg-white",
+                "data-[active=true]:bg-black"
+              )}
+              isActive={isSpaceActive(pathname, ownSpace.slug)}
+            >
+              <Link href={`/space/${ownSpace.slug}`}>
+                <span
+                  className={
+                    isSpaceActive(pathname, ownSpace.slug)
+                      ? "text-white"
+                      : undefined
+                  }
+                >
+                  {ownSpace.name}
+                </span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        )}
+        <p className="ps-2 pt-2 text-xs text-muted-foreground">
+          Following Spaces
+        </p>
+        {followingSpaces.length > 0 ? (
+          followingSpaces.map((space) => (
             <SidebarMenuItem key={space.id}>
               <SidebarMenuButton
                 asChild

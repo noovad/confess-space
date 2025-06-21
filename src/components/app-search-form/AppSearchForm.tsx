@@ -39,7 +39,7 @@ export function AppSearchForm({
 
   return (
     <form onSubmit={handleSubmit} {...props}>
-      <SidebarGroup className="pt-4">
+      <SidebarGroup className="p-0">
         <SidebarGroupContent className="relative">
           <Label htmlFor="search" className="sr-only">
             Search
