@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { jwtDecode } from 'jwt-decode'
 
-const GUEST_PATHS = ['/login', '/sign-up', '/callback']
+const GUEST_PATHS = ['/login', '/sign-up']
 
 interface JwtPayload {
     exp?: number
