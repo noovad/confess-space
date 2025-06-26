@@ -3,7 +3,6 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import Chat from "./components/Chat";
-import { messages } from "@/data/messages";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Send } from "lucide-react";
@@ -16,6 +15,7 @@ import { getUserFromClientCookie } from "@/utils/getUser";
 import { useSpaceStore } from "@/app/store/useSpaceStore";
 import { useUserSpaceStore } from "@/app/store/useUserSpaceStore";
 import { usePathname, useRouter } from "next/navigation";
+import { useMessageStore } from "@/app/store/useMessageStore";
 
 export default function SpacePage() {
   const router = useRouter();
@@ -26,6 +26,8 @@ export default function SpacePage() {
   const [isOwner, setIsOwner] = useState(false);
   const { isMemberOf, checkUserInSpace, joinToSpace, leaveFromSpace } =
     useUserSpaceStore();
+  const [message, setMessage] = useState<string>("");
+  const { addMessage, fetchMessages, messages } = useMessageStore();
 
   useEffect(() => {
     const u = getUserFromClientCookie();
@@ -47,6 +49,8 @@ export default function SpacePage() {
       if (currentUser?.id && currentSpace?.id) {
         checkUserInSpace(currentSpace.id, currentUser.id);
       }
+
+      await fetchMessages(currentSpace?.id || "");
     };
 
     if (scrollRef.current) {
@@ -74,6 +78,19 @@ export default function SpacePage() {
         checkUserInSpace(space.id, user.id);
         await useUserSpaceStore.getState().fetchFollowingSpaces(user.id);
         await useSpaceStore.getState().fetchAvailableSpacesSidebar();
+      }
+    }
+  };
+
+  const handleSendMessage = async (message: string) => {
+    if (space?.id && user?.id) {
+      const result = await addMessage(space.id, message);
+      if (result) {
+        await fetchMessages(space.id);
+
+        if (scrollRef.current) {
+          scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+        }
       }
     }
   };
@@ -110,9 +127,9 @@ export default function SpacePage() {
           className="flex-1 overflow-y-auto flex flex-col-reverse gap-2 p-4"
         >
           {messages.slice().map((msg, i, arr) => {
-            const currentDate = formatDate(msg.timestamp);
+            const currentDate = formatDate(msg.created_at);
             const nextDate = arr[i + 1]
-              ? formatDate(arr[i + 1].timestamp)
+              ? formatDate(arr[i + 1].created_at)
               : null;
 
             const showDateDivider = currentDate !== nextDate;
@@ -133,19 +150,36 @@ export default function SpacePage() {
             );
           })}
         </div>
-        {isMemberOf ||
-          (isOwner && (
-            <div className="pt-8 flex gap-4 justify-center items-center">
-              <Textarea
-                placeholder="Type your message here."
-                className="resize-none"
-                spellCheck="false"
-              />
-              <Button size="icon">
-                <Send />
-              </Button>
-            </div>
-          ))}
+        {isOwner || isMemberOf ? (
+          <div className="pt-8 flex gap-4 justify-center items-center">
+            <Textarea
+              placeholder="Type your message here."
+              className="resize-none"
+              spellCheck="false"
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+            />
+            <Button
+              size="icon"
+              disabled={!message || !message.trim()}
+              onClick={() => {
+                if (message && message.trim()) {
+                  handleSendMessage(message.trim());
+                  setMessage("");
+                }
+              }}
+            >
+              <span className="sr-only">Send message</span>
+              <Send />
+            </Button>
+          </div>
+        ) : (
+          <div className="flex justify-center items-center h-16">
+            <span className="text-sm text-muted-foreground">
+              You need to join the space to send messages.
+            </span>
+          </div>
+        )}
       </section>
     </main>
   );

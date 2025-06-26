@@ -28,6 +28,7 @@ import { UseAuthStore } from "@/app/store/useAuthStore";
 import { getUserFromClientCookie } from "@/utils/getUser";
 import { useEffect, useState } from "react";
 import { UserDto } from "@/dto/userDto";
+import { ProfileAvatarChanger } from "@/components/profile/ProfileAvatarChanger";
 
 export function NavUser() {
   const router = useRouter();
@@ -95,6 +96,63 @@ export function NavUser() {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
+              <Dialog>
+                <ProfileAvatarChanger />
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Select your avatar icon</DialogTitle>
+                    <DialogDescription>
+                      Choose an avatar style for your profile.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="grid grid-cols-2 gap-4 py-4">
+                    {[
+                      "notionists",
+                      "bottts",
+                      "dylan",
+                      "micah",
+                      "croodles",
+                      "adventurer",
+                      "pixel-art",
+                    ].map((type) => (
+                      <button
+                        key={type}
+                        className={`flex flex-col items-center gap-2 rounded-lg border p-2 transition-colors ${
+                          user?.avatar_type === type
+                            ? "border-primary bg-primary/10"
+                            : "border-muted"
+                        }`}
+                        onClick={() => {
+                          setUser((prev) =>
+                            prev ? { ...prev, avatar_type: type } : prev
+                          );
+                          // TODO: Call API to update avatar_type here
+                        }}
+                        type="button"
+                      >
+                        <AppAvatarUser
+                          name={user?.name}
+                          username={user?.username}
+                          avatarType={type}
+                          // size={48}
+                        />
+                        <span className="text-xs capitalize">{type}</span>
+                      </button>
+                    ))}
+                  </div>
+                  <DialogFooter>
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        // TODO: Save avatar_type to backend here
+                      }}
+                    >
+                      Save
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+              <DropdownMenuSeparator />
               <Dialog>
                 <DialogTrigger asChild>
                   <Button

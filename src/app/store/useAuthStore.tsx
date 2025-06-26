@@ -16,6 +16,7 @@ interface AuthState {
   ) => Promise<boolean>;
   logout: () => Promise<boolean>;
   deleteAccount: () => Promise<boolean>;
+  updateAvatar: (avatar: string) => Promise<boolean>;
 }
 
 export const UseAuthStore = create<AuthState>((set) => ({
@@ -120,6 +121,23 @@ export const UseAuthStore = create<AuthState>((set) => ({
     try {
       await axiosAuth.delete("/delete-account");
       toast.success("Account deleted successfully!");
+      return true;
+    } catch (error) {
+      if (error instanceof AxiosError && error.response?.data?.message) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error(
+          error instanceof AxiosError ? error.message : String(error)
+        );
+      }
+      return false;
+    }
+  },
+
+  updateAvatar: async (avatar) => {
+    try {
+      await axiosAuth.put("/update-avatar", { avatar_type: avatar });
+      toast.success("Avatar updated successfully!");
       return true;
     } catch (error) {
       if (error instanceof AxiosError && error.response?.data?.message) {

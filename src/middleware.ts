@@ -42,6 +42,7 @@ export function middleware(request: NextRequest) {
     response.cookies.set('user', token, {
         path: '/',
         httpOnly: false,
+        maxAge: 20
     });
 
     return response;
