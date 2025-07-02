@@ -15,7 +15,9 @@ export default function OnlineUsersSection() {
       <hr className="mb-4 border-black border-t-2" />
       <ul role="list" className="divide-y divide-gray-100">
         {activeUsers.length === 0 ? (
-          <li className="py-2 text-center text-gray-500">No users online</li>
+          <li key="no-users" className="py-2 text-center text-gray-500">
+            No users online
+          </li>
         ) : (
           activeUsers.map((user) => (
             <li key={user.email} className="flex justify-between gap-x-6 py-2">
@@ -34,7 +36,7 @@ export default function OnlineUsersSection() {
             </li>
           ))
         )}
-      </ul>{" "}
+      </ul>
     </div>
   );
 }

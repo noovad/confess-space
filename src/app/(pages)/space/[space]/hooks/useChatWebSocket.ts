@@ -64,7 +64,6 @@ export function useChatWebSocket(
             };
 
             ws.onerror = () => {
-                console.error("WebSocket connection error");
                 setWsStatus("error");
             };
 
