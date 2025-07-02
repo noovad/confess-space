@@ -24,8 +24,7 @@ export function useChatWebSocket(
         }
 
         try {
-            const wsUrl = `${process.env.NEXT_PUBLIC_WS_URL?.replace(/^http/, "ws") ||
-                process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/^http/, "ws")
+            const wsUrl = `${process.env.NEXT_PUBLIC_WS_BASE_URL
                 }/ws/connect?username=${encodeURIComponent(
                     user.username || ""
                 )}&name=${encodeURIComponent(
