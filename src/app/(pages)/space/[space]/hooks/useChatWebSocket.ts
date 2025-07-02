@@ -23,6 +23,10 @@ export function useChatWebSocket(
             wsRef.current.close();
         }
 
+        if (!user.avatar_type) {
+            user.avatar_type = "notionists";
+        }
+
         try {
             const wsUrl = `${process.env.NEXT_PUBLIC_WS_BASE_URL
                 }/ws/connect?username=${encodeURIComponent(
