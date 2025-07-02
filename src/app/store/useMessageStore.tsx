@@ -6,22 +6,24 @@ import { create } from "zustand";
 
 interface MessageStore {
   messages: MessageDto[];
-  addMessage: (spaceId: string, message: string) => Promise<boolean>;
+  addMessage: (
+    spaceId: string,
+    message: string,
+    spaceSlug: string
+  ) => Promise<boolean>;
   fetchMessages: (space: string) => Promise<boolean>;
 }
 
 export const useMessageStore = create<MessageStore>((set) => ({
   messages: [],
 
-  addMessage: async (spaceId, message) => {
+  addMessage: async (spaceId, message, spaceSlug) => {
+    console.log("Adding message to space:", spaceId, "Message:", message);
     try {
-      const response = await axiosApp.post("/message", {
+      await axiosApp.post("/message?channel=" + spaceSlug, {
         space_id: spaceId,
         message,
       });
-      set((state) => ({
-        messages: [...state.messages, response.data.data],
-      }));
       return true;
     } catch (error) {
       if (error instanceof AxiosError && error.response?.data?.message) {
@@ -36,8 +38,9 @@ export const useMessageStore = create<MessageStore>((set) => ({
   },
 
   fetchMessages: async (space) => {
+    console.log("Fetching messages for space:", space);
     try {
-      const response = await axiosApp.get("/message/" + space);
+      const response = await axiosApp.get("/messages/" + space);
       const data: MessageDto[] = response.data.data as MessageDto[];
 
       set({ messages: data });

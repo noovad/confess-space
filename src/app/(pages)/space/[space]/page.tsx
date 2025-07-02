@@ -1,103 +1,49 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import Chat from "./components/Chat";
+import { Send } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Send } from "lucide-react";
+import { Card } from "@/components/ui/card";
 import { formatDate, formatReadableDate } from "@/utils/date-utils";
+import Chat from "./components/Chat";
 import { JoinSpaceDialog } from "./components/JoinSpaceDialog";
 import { LeaveSpaceDialog } from "./components/LeaveSpaceDialog";
-import { Card } from "@/components/ui/card";
-import { UserDto } from "@/dto/userDto";
-import { getUserFromClientCookie } from "@/utils/getUser";
-import { useSpaceStore } from "@/app/store/useSpaceStore";
-import { useUserSpaceStore } from "@/app/store/useUserSpaceStore";
-import { usePathname, useRouter } from "next/navigation";
 import { useMessageStore } from "@/app/store/useMessageStore";
+import { useUserSpaceStore } from "@/app/store/useUserSpaceStore";
+import { useInitializeSpace } from "./hooks/useInitializeSpace";
+import { useChatWebSocket } from "./hooks/useChatWebSocket";
+import {
+  handleJoinSpace,
+  handleLeaveSpace,
+  handleSendMessage,
+} from "./lib/spaceHandlers";
 
 export default function SpacePage() {
-  const router = useRouter();
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [user, setUser] = useState<UserDto | null>(null);
-  const { space, fetchSpaceBySlug } = useSpaceStore();
-  const pathname = usePathname();
-  const [isOwner, setIsOwner] = useState(false);
-  const { isMemberOf, checkUserInSpace, joinToSpace, leaveFromSpace } =
-    useUserSpaceStore();
-  const [message, setMessage] = useState<string>("");
-  const { addMessage, fetchMessages, messages } = useMessageStore();
+
+  const [message, setMessage] = useState("");
+
+  const { user, isOwner, space } = useInitializeSpace();
+  const { isMemberOf } = useUserSpaceStore();
+  const { messages } = useMessageStore();
+  const { wsStatus } = useChatWebSocket(user, space, isOwner, isMemberOf);
 
   useEffect(() => {
-    const u = getUserFromClientCookie();
-    setUser(u);
-    const slug = pathname.split("/")[2];
-
-    const fetchData = async () => {
-      const result = await fetchSpaceBySlug(slug);
-      if (!result) {
-        router.push("/");
-        return;
-      }
-
-      const currentUser = u;
-      const currentSpace = useSpaceStore.getState().space;
-      if (currentSpace?.owner_id === currentUser?.id) {
-        setIsOwner(true);
-      }
-      if (currentUser?.id && currentSpace?.id) {
-        checkUserInSpace(currentSpace.id, currentUser.id);
-      }
-
-      await fetchMessages(currentSpace?.id || "");
-    };
-
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
+  }, [messages]);
 
-    fetchData();
-  }, []);
-
-  const handleJoinSpace = async () => {
-    if (space?.id && user?.id) {
-      const result = await joinToSpace(space.id, user.id);
-      if (result) {
-        checkUserInSpace(space.id, user.id);
-        await useUserSpaceStore.getState().fetchFollowingSpaces(user.id);
-        await useSpaceStore.getState().fetchAvailableSpacesSidebar();
-      }
-    }
-  };
-
-  const handleLeaveSpace = async () => {
-    if (space?.id && user?.id) {
-      const result = await leaveFromSpace(space.id);
-      if (result) {
-        checkUserInSpace(space.id, user.id);
-        await useUserSpaceStore.getState().fetchFollowingSpaces(user.id);
-        await useSpaceStore.getState().fetchAvailableSpacesSidebar();
-      }
-    }
-  };
-
-  const handleSendMessage = async (message: string) => {
-    if (space?.id && user?.id) {
-      const result = await addMessage(space.id, message);
-      if (result) {
-        await fetchMessages(space.id);
-
-        if (scrollRef.current) {
-          scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-        }
-      }
-    }
+  const onJoinSpace = () => handleJoinSpace(space, user);
+  const onLeaveSpace = () => handleLeaveSpace(space, user);
+  const onSendMessage = () => {
+    handleSendMessage(message, space, user, () => setMessage(""));
   };
 
   return (
     <main className="h-screen p-4">
-      <section className="flex h-full w-full flex-col">
+      <section className="flex flex-col h-full w-full">
         <Card
           className="mb-4 flex flex-row items-center justify-between px-4 py-2 bg-white shadow-sm rounded-lg"
           style={{ backgroundColor: "var(--background)" }}
@@ -116,68 +62,79 @@ export default function SpacePage() {
           </div>
           {!isOwner &&
             (isMemberOf ? (
-              <LeaveSpaceDialog onLeave={handleLeaveSpace} />
+              <LeaveSpaceDialog onLeave={onLeaveSpace} />
             ) : (
-              <JoinSpaceDialog onJoin={handleJoinSpace} />
+              <JoinSpaceDialog onJoin={onJoinSpace} />
             ))}
         </Card>
 
         <div
           ref={scrollRef}
-          className="flex-1 overflow-y-auto flex flex-col-reverse gap-2 p-4"
+          className="flex-1 overflow-y-auto flex-col flex p-4 gap-2"
         >
-          {messages.slice().map((msg, i, arr) => {
-            const currentDate = formatDate(msg.created_at);
-            const nextDate = arr[i + 1]
-              ? formatDate(arr[i + 1].created_at)
-              : null;
+          {wsStatus === "error" && (
+            <div className="text-center text-sm text-red-500 bg-red-50 px-3 py-1 rounded-md">
+              Connection error. Some messages may not be displayed.
+            </div>
+          )}
 
-            const showDateDivider = currentDate !== nextDate;
+          {wsStatus === "connecting" && (
+            <div className="text-center text-sm text-blue-500 bg-blue-50 px-3 py-1 rounded-md">
+              Connecting to chat...
+            </div>
+          )}
+
+          {[...messages].reverse().map((msg, i, arr) => {
+            const currentDate = formatDate(msg.created_at);
+            const prevDate = arr[i - 1]
+              ? formatDate(arr[i - 1].created_at)
+              : null;
+            const showDateDivider = currentDate !== prevDate;
 
             return (
               <React.Fragment key={msg.id}>
-                <Chat
-                  message={msg}
-                  nextMessage={showDateDivider ? undefined : arr[i + 1]}
-                />
-
                 {showDateDivider && (
                   <div className="text-center text-sm text-gray-500 my-4">
                     {formatReadableDate(currentDate)}
                   </div>
                 )}
+                <Chat message={msg} prevMessage={arr[i - 1]} />
               </React.Fragment>
             );
           })}
         </div>
+
         {isOwner || isMemberOf ? (
           <div className="pt-8 flex gap-4 justify-center items-center">
             <Textarea
               placeholder="Type your message here."
               className="resize-none"
-              spellCheck="false"
+              spellCheck={false}
               value={message}
               onChange={(e) => setMessage(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey && message.trim()) {
+                  e.preventDefault();
+                  onSendMessage();
+                }
+              }}
             />
             <Button
               size="icon"
-              disabled={!message || !message.trim()}
-              onClick={() => {
-                if (message && message.trim()) {
-                  handleSendMessage(message.trim());
-                  setMessage("");
-                }
-              }}
+              disabled={!message.trim() || wsStatus !== "connected"}
+              onClick={onSendMessage}
+              title={
+                wsStatus !== "connected"
+                  ? "Waiting for connection..."
+                  : undefined
+              }
             >
-              <span className="sr-only">Send message</span>
               <Send />
             </Button>
           </div>
         ) : (
-          <div className="flex justify-center items-center h-16">
-            <span className="text-sm text-muted-foreground">
-              You need to join the space to send messages.
-            </span>
+          <div className="h-16 flex justify-center items-center text-sm text-muted-foreground">
+            You need to join the space to send messages.
           </div>
         )}
       </section>

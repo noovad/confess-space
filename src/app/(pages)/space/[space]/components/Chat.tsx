@@ -1,3 +1,5 @@
+"use client";
+
 import { AppAvatarUser } from "@/components/app-avatar-user/AppAvatarUser";
 import { MessageDto } from "@/dto/messageDto";
 import { getUserFromClientCookie } from "@/utils/getUser";
@@ -5,70 +7,65 @@ import { formatTimeOnly } from "@/utils/time-utils";
 
 interface ChatProps {
   message: MessageDto;
-  nextMessage?: MessageDto;
+  prevMessage?: MessageDto; // ganti dari "nextMessage"
 }
 
-export default function Chat({ message, nextMessage }: ChatProps) {
-  function isSender(username: string): boolean {
-    const user = getUserFromClientCookie();
-    return user ? username === user.username : false;
-  }
+export default function Chat({ message, prevMessage }: ChatProps) {
+  const currentUser = getUserFromClientCookie();
+  const isSender = message.user?.username === currentUser?.username;
+  const isSameUser = prevMessage?.user?.username === message.user?.username;
+  const showName = !isSameUser;
 
-  function isSameUser(): boolean {
-    return !!(
-      nextMessage?.user &&
-      message.user &&
-      nextMessage.user.username === message.user.username
-    );
-  }
+  if (!message.user) return null;
 
-  if (!message.user) {
-    return null;
-  }
+  return (
+    <div
+      className={`flex ${
+        isSender ? "justify-end" : "justify-start"
+      } mb-2 items-start`}
+    >
+      {/* Avatar (pengirim di kanan, penerima di kiri) */}
+      {!isSender &&
+        (showName ? (
+          <AppAvatarUser
+            name={message.user.name}
+            username={message.user.username}
+            avatarType={message.user.avatar_type}
+          />
+        ) : (
+          <div className="size-8" />
+        ))}
 
-  const showName = !isSameUser();
-
-  return isSender(message.user.username) ? (
-    <div className="flex justify-end mb-4 items-start">
-      <div className="bg-white border rounded-xl rounded-br-none py-2 px-4 me-4">
+      <div
+        className={`max-w-xs md:max-w-md lg:max-w-lg border bg-white px-4 py-2 rounded-xl ${
+          isSender
+            ? "rounded-br-none me-4 text-right"
+            : "rounded-bl-none ms-4 text-left"
+        }`}
+      >
         {showName && (
           <div className="text-xs text-gray-400 mb-1">{message.user.name}</div>
         )}
-        {message.content}
-        <small className="flex justify-start text-xs text-gray-500 mt-1">
+        <div className="whitespace-pre-line break-words">{message.content}</div>
+        <small
+          className={`mt-1 text-xs text-gray-500 ${
+            isSender ? "flex justify-start" : "flex justify-end"
+          }`}
+        >
           {formatTimeOnly(message.created_at)}
         </small>
       </div>
-      {showName ? (
-        <AppAvatarUser
-          name={message.user.name}
-          username={message.user.username}
-          avatarType={message.user.avatar_type}
-        />
-      ) : (
-        <div className="size-8" />
-      )}
-    </div>
-  ) : (
-    <div className="flex justify-start mb-2 items-start">
-      {showName ? (
-        <AppAvatarUser
-          name={message.user.name}
-          username={message.user.username}
-          avatarType={message.user.avatar_type}
-        />
-      ) : (
-        <div className="size-8" />
-      )}
-      <div className="bg-white border rounded-xl rounded-bl-none py-2 px-4 ms-4">
-        {showName && (
-          <div className="text-xs text-gray-400 mb-1">{message.user.name}</div>
-        )}
-        {message.content}
-        <small className="flex justify-end text-xs text-gray-500 mt-1">
-          {formatTimeOnly(message.created_at)}
-        </small>
-      </div>
+
+      {isSender &&
+        (showName ? (
+          <AppAvatarUser
+            name={message.user.name}
+            username={message.user.username}
+            avatarType={message.user.avatar_type}
+          />
+        ) : (
+          <div className="size-8" />
+        ))}
     </div>
   );
 }

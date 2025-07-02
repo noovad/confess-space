@@ -37,12 +37,12 @@ export function middleware(request: NextRequest) {
 
         return NextResponse.redirect(new URL('/login', request.url))
     }
+
     const response = NextResponse.next();
 
     response.cookies.set('user', token, {
         path: '/',
         httpOnly: false,
-        maxAge: 20
     });
 
     return response;
