@@ -54,6 +54,9 @@ export function useChatWebSocket(
                         useMessageStore.setState((state) => ({
                             messages: [newMessage, ...state.messages]
                         }));
+                    } else if (data.type === "user" || data.type === "users") {
+                        const activeUsers: UserDto[] = data.users || data.users_data || [];
+                        useMessageStore.setState({ activeUsers });
                     }
                 } catch (error) {
                     console.error("Error parsing WebSocket message:", error);
