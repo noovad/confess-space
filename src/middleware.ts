@@ -20,32 +20,34 @@ function isValidToken(token: string): boolean {
 export function middleware(request: NextRequest) {
     const pathname = request.nextUrl.pathname
 
-    const token = request.cookies.get('access_token')?.value
+    const accessToken = request.cookies.get('access_token')?.value
+    const refreshToken = request.cookies.get('refresh_token')?.value
 
-    if (GUEST_PATHS.some(path => pathname.startsWith(path))) {
-        if (token && isValidToken(token)) {
+    const isGuestPath = GUEST_PATHS.some(path => pathname.startsWith(path))
+    const isAccessTokenValid = accessToken && isValidToken(accessToken)
+    const isRefreshTokenValid = refreshToken && isValidToken(refreshToken)
+
+    if (isGuestPath) {
+        if (isAccessTokenValid || isRefreshTokenValid) {
             return NextResponse.redirect(new URL('/', request.url))
         }
         return NextResponse.next()
     }
 
-    if (!token || !isValidToken(token)) {
-        const refreshToken = request.cookies.get('refresh_token')?.value
-        if (refreshToken) {
+    if (!isAccessTokenValid) {
+        if (isRefreshTokenValid) {
             return NextResponse.next()
         }
-
         return NextResponse.redirect(new URL('/login', request.url))
     }
 
-    const response = NextResponse.next();
-
-    response.cookies.set('user', token, {
+    const response = NextResponse.next()
+    response.cookies.set('user', accessToken, {
         path: '/',
         httpOnly: false,
-    });
+    })
 
-    return response;
+    return response
 }
 
 export const config = {
