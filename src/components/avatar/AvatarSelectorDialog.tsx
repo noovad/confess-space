@@ -50,6 +50,10 @@ export function AvatarSelectorDialog({
         <DialogTitle>Select your avatar icon</DialogTitle>
         <DialogDescription>
           Choose an avatar style for your profile.
+          <br />
+          <span className="text-xs text-muted-foreground">
+            Your photo will be updated in about 5 minutes.
+          </span>
         </DialogDescription>
       </DialogHeader>
 

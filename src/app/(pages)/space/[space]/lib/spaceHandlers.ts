@@ -49,6 +49,7 @@ export async function handleJoinSpace(
         const result = await joinToSpace(space.id, user.id);
 
         if (result) {
+            useUserSpaceStore.setState({ isMemberOf: true });
             await useUserSpaceStore.getState().fetchFollowingSpaces(user.id);
             await useSpaceStore.getState().fetchAvailableSpacesSidebar();
             return true;
@@ -75,6 +76,7 @@ export async function handleLeaveSpace(
         const result = await leaveFromSpace(space.id);
 
         if (result) {
+            useUserSpaceStore.setState({ isMemberOf: false });
             await useUserSpaceStore.getState().fetchFollowingSpaces(user.id);
             await useSpaceStore.getState().fetchAvailableSpacesSidebar();
             return true;
