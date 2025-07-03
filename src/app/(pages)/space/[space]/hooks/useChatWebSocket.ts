@@ -84,6 +84,9 @@ export function useChatWebSocket(
             if (wsRef.current) {
                 wsRef.current.close();
                 wsRef.current = null;
+
+                setWsStatus("disconnected");
+                useMessageStore.setState({ activeUsers: [] });
             }
         };
     }, [user, space, isOwner, isMemberOf]);

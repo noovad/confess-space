@@ -113,7 +113,8 @@ export default function SpacePage() {
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey && message.trim()) {
+                const isDisabled = !message.trim() || wsStatus !== "connected";
+                if (e.key === "Enter" && !e.shiftKey && !isDisabled) {
                   e.preventDefault();
                   onSendMessage();
                 }

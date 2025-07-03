@@ -22,7 +22,6 @@ export const useMessageStore = create<MessageStore>((set) => ({
   activeUsers: [],
 
   addMessage: async (spaceId, message, spaceSlug) => {
-    console.log("Adding message to space:", spaceId, "Message:", message);
     try {
       await axiosApp.post("/message?channel=" + spaceSlug, {
         space_id: spaceId,
@@ -42,7 +41,6 @@ export const useMessageStore = create<MessageStore>((set) => ({
   },
 
   fetchMessages: async (space) => {
-    console.log("Fetching messages for space:", space);
     try {
       const response = await axiosApp.get("/messages/" + space);
       const data: MessageDto[] = response.data.data as MessageDto[];
